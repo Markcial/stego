@@ -1,0 +1,24 @@
+{
+    "name": "markcial/stego",
+    "description": "Atomic dependency package manager.",
+    "require": {
+        "guzzle/guzzle": "@stable",
+        "symfony/console": "@stable"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "@stable",
+        "mockery/mockery": "@stable"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marc Garcia",
+            "email": "markcial@gmail.com"
+        }
+    ],
+  "autoload": {
+      "psr-0": {
+            "Stego\\": "src/"
+       }
+  }
+}
