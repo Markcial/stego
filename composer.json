@@ -3,6 +3,7 @@
     "description": "Atomic dependency package manager.",
     "require": {
         "guzzle/guzzle": "@stable",
+	"composer/composer": "dev-master",
         "symfony/console": "@stable"
     },
     "require-dev": {

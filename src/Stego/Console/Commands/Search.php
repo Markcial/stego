@@ -2,7 +2,6 @@
 
 namespace Stego\Console\Commands;
 
-use Guzzle\Http\Client;
 use Stego\Packages\Browser;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -40,7 +39,6 @@ class Search extends Command
     {
         $name = $input->getArgument('name');
         $browser = new Browser();
-
         $data = $browser->find($name);
 
         $display = array();
