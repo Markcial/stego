@@ -3,12 +3,12 @@
     "description": "Atomic dependency package manager.",
     "require": {
         "guzzle/guzzle": "@stable",
-	"composer/composer": "dev-master",
-        "symfony/console": "@stable"
+        "composer/composer": "dev-master",
     },
     "require-dev": {
         "phpunit/phpunit": "@stable",
-        "mockery/mockery": "@stable"
+        "mockery/mockery": "@stable",
+        "psy/psysh": "@stable"
     },
     "license": "MIT",
     "authors": [
@@ -17,9 +17,9 @@
             "email": "markcial@gmail.com"
         }
     ],
-  "autoload": {
-      "psr-0": {
-            "Stego\\": "src/"
-       }
-  }
+    "autoload": {
+        "psr-0": {
+              "Stego\\": "src/"
+         }
+    }
 }

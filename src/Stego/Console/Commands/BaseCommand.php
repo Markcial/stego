@@ -64,21 +64,15 @@ class BaseCommand extends Command
      */
     protected function searchPackage($name, $version = '@stable')
     {
-        if ($composer = $this->getComposer(false)) {
-            $localRepo = $composer->getRepositoryManager()->getLocalRepository();
-            $repos = new CompositeRepository(array_merge(array($localRepo), $composer->getRepositoryManager()->getRepositories()));
-        } else {
-            $defaultRepos = Factory::createDefaultRepositories($this->getConsoleIO());
-            $this->getConsoleIO()->writeError('No composer.json found in the current directory, searching packages from ' . implode(', ', array_keys($defaultRepos)));
-            $repos = new CompositeRepository($defaultRepos);
-        }
+        $localRepo = $this->getComposer()->getRepositoryManager()->getLocalRepository();
+        $repos = new CompositeRepository(array_merge(array($localRepo), $this->getComposer()->getRepositoryManager()->getRepositories()));
 
         $pool = new Pool();
         $pool->addRepository($repos);
 
         $parser = new VersionParser();
         $constraint = ($version) ? $parser->parseConstraints($version) : null;
-        $packages = $pool->whatProvides($name, $constraint, true);
+        $packages = $pool->whatProvides($name, $constraint);
 
         if (count($packages) > 1) {
             $package = reset($packages);

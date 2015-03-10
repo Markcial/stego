@@ -3,6 +3,7 @@
 namespace Stego\Packages;
 
 use Composer\Package\Package;
+use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
 class Compiler implements CompilerInterface{
 
@@ -16,11 +17,10 @@ class Compiler implements CompilerInterface{
             $pkg->getPrettyVersion(). DIRECTORY_SEPARATOR;
     }
 
-    protected function createStub($composer)
+    protected function createStub()
     {
         $stub = "<?php\n";
         $stub .= sprintf("Phar::mapPhar('%s');\n", self::PHAR_NAME);
-        $stub .= 'return ' . var_export($composer, true) . ';' . "\n";
         $stub .= '__HALT_COMPILER();' . "\n";
         $stub .= '?>' . "\n";
 
@@ -44,28 +44,9 @@ class Compiler implements CompilerInterface{
         $phar->setSignatureAlgorithm(\Phar::SHA1);
         $phar->startBuffering();
 
-        $files = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($source),
-            \RecursiveIteratorIterator::SELF_FIRST
-        );
-        foreach($files as $name => $file){
-            $local = str_replace($source . DIRECTORY_SEPARATOR, '', $name);
+        $phar->buildFromDirectory(realpath($source));
 
-            if (fnmatch('*.', $local)) {
-                continue;
-            }
-
-            echo $local . PHP_EOL;
-
-            $phar->addFromString(
-                $local,
-                $this->stripWhitespace(file_get_contents($name))
-            );
-        }
-
-        $composer = file_get_contents($source . DIRECTORY_SEPARATOR . 'composer.json');
-
-        $phar->setStub($this->createStub(json_decode($composer, true)));
+        $phar->setStub($this->createStub());
 
         $phar->stopBuffering();
 

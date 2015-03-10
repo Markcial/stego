@@ -3,8 +3,20 @@
 
 namespace Stego\Console\Commands;
 
+use Composer\DependencyResolver\DefaultPolicy;
+use Composer\DependencyResolver\Pool;
+use Composer\DependencyResolver\Request;
+use Composer\DependencyResolver\Solver;
+use Composer\DependencyResolver\SolverProblemsException;
+use Composer\Installer;
+use Composer\Package\AliasPackage;
 use Composer\Package\Link;
+use Composer\Package\LinkConstraint\VersionConstraint;
 use Composer\Package\Package;
+use Composer\Package\RootPackage;
+use Composer\Repository\CompositeRepository;
+use Composer\Repository\InstalledArrayRepository;
+use Composer\Repository\PlatformRepository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,6 +26,12 @@ class Install extends BaseCommand
 {
     const BASE = 'deps';
     const PHAR_NAME = 'pkg.phar';
+
+    /** @var RootPackage */
+    protected $rootPackage;
+    protected $localRepo;
+    protected $platformRepo;
+    protected $installedRepo;
 
     protected function configure()
     {
@@ -83,7 +101,11 @@ class Install extends BaseCommand
 
         /** @var Link $require */
         foreach ($package->getRequires() as $require) {
+            if (preg_match('#^(php|ext-.*)$#', $require->getTarget())) {
+                continue;
+            }
             $dep = $this->searchPackage($require->getTarget(), $require->getPrettyConstraint());
+
             if ($dep) {
                 $this->install($dep);
             }
