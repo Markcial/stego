@@ -4,8 +4,8 @@
 system('bin/stego loader');
 
 $loader = require 'deps/stego.phar';
-$loader->import('doctrine/common');
-$loader->import('doctrine/collections', 'v1.0');
+$loader->import('doctrine/common','v2.4.0');
+$loader->import('doctrine/collections');
 $loader->import('ulabox/money');
 Doctrine\Common\Util\Debug::dump('asdasd');
 $array = new Doctrine\Common\Collections\ArrayCollection();
