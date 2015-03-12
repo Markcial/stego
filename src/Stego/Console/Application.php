@@ -59,7 +59,6 @@ BANNER;
 
             $command = $this->getStdio()->getCommand();
             $this->runCommand($command);
-            continue;
         }
     }
 

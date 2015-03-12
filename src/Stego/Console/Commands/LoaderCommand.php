@@ -2,7 +2,7 @@
 
 namespace Stego\Console\Commands;
 
-class Loader
+class LoaderCommand
 {
     use Command;
 /*

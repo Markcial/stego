@@ -2,10 +2,12 @@
 
 namespace Stego;
 
-use Stego\Exceptions\MissingDependencyException;
-
 class Container
 {
+    /**
+     * TODO add environment replacement variables support
+     */
+
     /** @var \stdClass */
     protected $di;
     /** @var \SplObjectStorage */
@@ -28,10 +30,9 @@ class Container
      */
     public function set($name, $dep)
     {
-        if (is_callable($dep)) {
-            $dep = $this->call($dep);
+        if (preg_match('!^stego:!', $name) && property_exists($this->di, $name)) {
+            throw new \RuntimeException(sprintf('Protected property "%s" has already been set.', $name));
         }
-
         if (is_string($dep)) {
             if (preg_match('!^#!', $dep)) {
 
@@ -58,7 +59,11 @@ class Container
             return preg_replace_callback(
                 '!%\{(?P<var>[^}]+)\}!m',
                 function ($match) {
-                    return $this->get(sprintf('stego:vars:%s', $match['var']));
+                    if ($var = $this->get(sprintf('stego:vars:%s', $match['var']))) {
+                        return $var;
+                    }
+
+                    return $this->get(sprintf('vars:%s', $match['var']));
                 },
                 $dependency
             );
@@ -73,8 +78,14 @@ class Container
      */
     public function get($name)
     {
+        $dependency = null;
         if (property_exists($this->di, $name)) {
             $dependency = $this->di->{$name};
+        } elseif (property_exists($this->di, $pname = sprintf('stego:%s',$name))) {
+            $dependency = $this->di->{$pname};
+        }
+
+        if ($dependency) {
             if (is_string($dependency)) {
                 $dependency = $this->applyVars($dependency);
 
@@ -84,12 +95,14 @@ class Container
                 }
             }
 
+            if (is_callable($dependency)) {
+                $dependency = $this->call($dependency);
+            }
+
             return $dependency;
         }
 
-        throw new MissingDependencyException(
-            sprintf('Dependency named %s not found.', $name)
-        );
+        return false;
     }
 
     /**

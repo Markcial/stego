@@ -7,12 +7,8 @@ use Composer\Installer;
 use Composer\Package\Link;
 use Composer\Package\Package;
 use Composer\Package\RootPackage;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 
-class Install
+class InstallCommand
 {
     use Command;
 
