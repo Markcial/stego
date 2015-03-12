@@ -14,7 +14,7 @@ class Loader
         ;
     }
 */
-    public function execute()
+    public function execute($args = array())
     {
         $di = $this->getContainer();
 

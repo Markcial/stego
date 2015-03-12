@@ -10,46 +10,40 @@ class Compiler implements CompilerInterface
 {
     use ContainerAware;
 
-    const BASE = 'deps';
-    const PHAR_NAME = 'package.phar';
-
-    public function getDestinationFolder(Package $pkg)
-    {
-        return self::BASE . DIRECTORY_SEPARATOR .
-            $pkg->getName() . DIRECTORY_SEPARATOR .
-            $pkg->getPrettyVersion(). DIRECTORY_SEPARATOR;
-    }
-
-    protected function createStub()
+    protected function createStub($pharName)
     {
         $stub = "<?php\n";
-        $stub .= sprintf("Phar::mapPhar('%s');\n", self::PHAR_NAME);
+        $stub .= sprintf("Phar::mapPhar('%s');\n", $pharName);
         $stub .= '__HALT_COMPILER();' . "\n";
         $stub .= '?>' . "\n";
 
         return $stub;
     }
 
-    public function compile(Package $package, $source)
+    public function compile($package, $source)
     {
-        $dirname = $this->getDestinationFolder($package);
-        if (!file_exists($dirname)) {
-            @mkdir($dirname, 0777, true);
+        $container = $this->getContainer();
+        $container->set('stego:vars:dyn:vendor', $package->getName());
+        $container->set('stego:vars:dyn:version', $package->getVersion());
+
+        $pharDestination = $container->get('stego:vars:deps:dynamic');
+        $dir = dirname($pharDestination);
+
+        if (!file_exists($dir)) {
+            @mkdir($dir, 0777, true);
         }
 
-        $pharLocation = $dirname . self::PHAR_NAME;
-
-        if (file_exists($pharLocation)) {
-            @unlink($pharLocation);
+        if (file_exists($pharDestination)) {
+            @unlink($pharDestination);
         }
 
-        $phar = new \Phar($pharLocation, 0, basename(self::PHAR_NAME));
+        $phar = new \Phar($pharDestination, 0, basename($pharDestination));
         $phar->setSignatureAlgorithm(\Phar::SHA1);
         $phar->startBuffering();
 
         $phar->buildFromDirectory(realpath($source));
 
-        $phar->setStub($this->createStub());
+        $phar->setStub($this->createStub(basename($pharDestination)));
 
         $phar->stopBuffering();
 

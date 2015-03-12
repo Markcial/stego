@@ -5,6 +5,7 @@ namespace Stego\Console;
 use Stego\Console\Commands\Command;
 use Stego\Console\Commands\Stdio\IOTerm;
 use Stego\ContainerAware;
+use Stego\Exceptions\MissingDependencyException;
 use Stego\Packages\Compiler;
 
 class Application
@@ -13,6 +14,8 @@ class Application
 
     /** @var IOTerm */
     protected $stdio;
+
+    protected $mustQuit = false;
 
     public function __construct()
     {
@@ -40,34 +43,75 @@ BANNER;
         return $this->stdio;
     }
 
-    public function run()
+    public function shell()
     {
         if (PHP_SAPI !== 'cli') {
             throw new \RuntimeException('The console application can only be called via cli.');
         }
-        $argv = $_SERVER['argv'];
-        array_shift($argv);
-        $command = array_shift($argv);
-        $command = $this->getCommand($command);
 
-        $command->execute();
+        while (!$this->mustQuit) {
+            $this->getStdio()->readline();
+            if (!$this->getStdio()->areArgsValid()) {
+                $command = 'usage';
+                $this->runCommand($command);
+                continue;
+            }
 
-        var_dump($_SERVER['argv']);
+            $command = $this->getStdio()->getCommand();
+            $this->runCommand($command);
+            continue;
+        }
     }
 
-    /**
-     * @return Compiler
-     */
-    public function getCompiler()
+    public function run()
     {
-        return $this->getContainer()->get('stego:compiler');
+        $command = $this->getStdio()->getCommand();
+
+        return $this->runCommand($command);
+    }
+
+    protected function runCommand($name)
+    {
+        // maybe the command is  asimple call to the application
+        if (method_exists($this, $name)) {
+            return call_user_func(array($this, $name));
+        }
+        // or maybe is a dependency that needs to be loaded
+        try {
+            $command = $this->getCommand($name);
+        } catch (MissingDependencyException $exc) { // create exception for not found dependencies
+            $this->getStdio()->write('%{error}' . $exc->getMessage());
+            return $this->runCommand('usage');
+        }
+
+        return $command->execute($this->getStdio()->getArgs());
+        //$command->execute($ags);
+    }
+
+    public function usage()
+    {
+        $usage = <<<HELP
+usage of the shell.
+command [--args]
+
+avaliable commands
+    loader
+    search
+    install
+    usage|help
+    version
+    exit
+HELP;
+
+        $this->getStdio()->write('%{info}' . $usage);
     }
 
     /**
      * @param $name
      * @return Command
      */
-    protected function getCommand($name) {
+    protected function getCommand($name)
+    {
         $command = $this->getContainer()->get(sprintf('stego:console:commands:%s', $name));
         $command->setApplication($this);
         return $command;

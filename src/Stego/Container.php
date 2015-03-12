@@ -2,6 +2,8 @@
 
 namespace Stego;
 
+use Stego\Exceptions\MissingDependencyException;
+
 class Container
 {
     /** @var \stdClass */
@@ -85,7 +87,7 @@ class Container
             return $dependency;
         }
 
-        throw new \RuntimeException(
+        throw new MissingDependencyException(
             sprintf('Dependency named %s not found.', $name)
         );
     }

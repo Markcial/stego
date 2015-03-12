@@ -12,17 +12,16 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Install extends Command
+class Install
 {
-    const BASE = 'deps';
-    const PHAR_NAME = 'pkg.phar';
+    use Command;
 
     /** @var RootPackage */
     protected $rootPackage;
     protected $localRepo;
     protected $platformRepo;
     protected $installedRepo;
-
+/*
     protected function configure()
     {
         $this
@@ -45,48 +44,30 @@ class Install extends Command
             )
         ;
     }
+*/
 
     /**
-     * @param $vendor
-     * @param string $version
-     * @return string
-     */
-    protected function getInstallPath($vendor, $version = 'dev-master')
-    {
-        return self::BASE . DIRECTORY_SEPARATOR . $version . DIRECTORY_SEPARATOR . $vendor;
-    }
-
-    /**
-     * @return string
-     */
-    protected function getTempPath()
-    {
-        return sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'stego';
-    }
-
-    /**
-     * @param $name
-     * @param $version
      * @return Package
      */
-    protected function install(Package $package)
+    protected function install($package)
     {
+        $tmp = $this->getContainer()->get('stego:vars:fs:tmp');
         /** @var Package $package */
-        $this->getComposer()->getDownloadManager()->download($package, $this->getTempPath());
+        $this->getComposer()->getDownloadManager()->download($package, $tmp);
 
-        $this->getApplication()->getCompiler()->compile($package, $this->getTempPath());
+        $this->getContainer()->get('stego:compiler')->compile($package, $tmp);
+
+        @unlink($tmp);
 
         return $package;
     }
 
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute($args = array())
     {
-        $name = $input->getArgument('name');
-        if (!$version = $input->getOption('constraint')) {
-            $version = '@stable';
-        }
+        $library = array_shift($args);
+        $version = array_shift($args);
 
-        $package = $this->searchPackage($name, $version);
+        $package = $this->searchPackage($library, $version);
         $package = $this->install($package);
 
         /** @var Link $require */

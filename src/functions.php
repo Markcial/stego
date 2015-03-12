@@ -2,8 +2,6 @@
 
 namespace Stego;
 
-use Stego\Packages\Locator;
-
 spl_autoload_register(function ($class) {
     $file = preg_replace('#\\\|_(?!.+\\\)#', '/', $class) . '.php';
     $path = __DIR__ . DIRECTORY_SEPARATOR . $file;
@@ -48,6 +46,8 @@ function import($vendor, $version = 'latest')
     if ($location = $locator->locate($vendor, $version)) {
         $metadata = service()->getDi()->get('stego:vars:deps:metadata');
         $metadata = json_decode($metadata, true);
+        // fallback psr-0
+        $loader->addPsr0Path('phar://' . $location . DIRECTORY_SEPARATOR);
         // psr-0
         if (
             array_key_exists('autoload', $metadata) &&
@@ -66,9 +66,18 @@ function import($vendor, $version = 'latest')
                 $loader->addPsr4Path($prefix, 'phar://' . $location . DIRECTORY_SEPARATOR . $path);
             }
         }
-        $loader->bootstrap();
+        return $loader->bootstrap();
     }
+
+    return trigger_error(sprintf('Library %s not found.', $vendor));
 }
+
+// we use the guzzle http library, so we load it
+import('guzzle/guzzle', '3.9.2.0');
+import('composer/composer', '1.0.9999999.9999999-dev');
+import('symfony/console', '2.6.4.0');
+
+//require_once 'vendor/autoload.php';
 
 function shell()
 {
@@ -78,15 +87,18 @@ function shell()
         $app = service()->getApplication();
     }
 
-    $keepLoop = true;
-    while ($keepLoop) {
-        $input = readline("\033[0;34mStg>\033[0m ");
+    $app->shell();
+}
 
-        
-        if ($input === 'exit') {
-            $keepLoop = false;
-        }
+function run()
+{
+    static $app;
+
+    if (!isset($app)) {
+        $app = service()->getApplication();
     }
+
+    $app->run();
 }
 
 /**

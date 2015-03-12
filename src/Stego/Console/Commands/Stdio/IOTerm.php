@@ -3,8 +3,12 @@
 namespace Stego\Console\Commands\Stdio;
 
 /**
- * Class IOTerm
- * @package Stego\Console\Commands\Stdio
+ * Output methods
+ * ==============
+ * @method write
+ * Input methods
+ * ==================
+ * @method getCommand
  * @method getArgs
  */
 class IOTerm
@@ -32,4 +36,4 @@ class IOTerm
 
         throw new \RuntimeException(sprintf('Method named %s not found.', $name));
     }
-} 
+}
