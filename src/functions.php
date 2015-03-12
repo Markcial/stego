@@ -70,6 +70,25 @@ function import($vendor, $version = 'latest')
     }
 }
 
+function shell()
+{
+    static $app;
+
+    if (!isset($app)) {
+        $app = service()->getApplication();
+    }
+
+    $keepLoop = true;
+    while ($keepLoop) {
+        $input = readline("\033[0;34mStg>\033[0m ");
+
+        
+        if ($input === 'exit') {
+            $keepLoop = false;
+        }
+    }
+}
+
 /**
  * @return string
  */

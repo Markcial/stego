@@ -17,6 +17,7 @@ class Service
             'stego:inspector' => '#Stego\Packages\Inspector',
             'stego:locator' => '#Stego\Packages\Locator',
             'stego:console:stdio' => '#Stego\Console\Commands\Stdio\IOTerm',
+            'stego:console:application' => '#Stego\Console\Application',
 //            'stego:console:commands:install' => '#Stego\Console\Commands\Install',
             'stego:console:commands:loader' => '#Stego\Console\Commands\Loader',
 //            'stego:console:commands:search' => '#Stego\Console\Commands\Search',
@@ -31,6 +32,11 @@ class Service
             'stego:vars:build:dest' => '%{fs:root}/%{deps:folder}/%{build:pharname}',
         ), $config);
         $this->container = new Container($config);
+    }
+
+    public function getApplication()
+    {
+        return $this->getDi()->get('stego:console:application');
     }
 
     /**

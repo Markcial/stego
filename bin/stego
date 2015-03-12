@@ -3,5 +3,5 @@
 
 require_once dirname(__DIR__) .  '/vendor/autoload.php';
 
-$app = new \Stego\Console\Application();
-$app->run();
+$app = new \Stego\Service();
+$app->getApplication()->run();

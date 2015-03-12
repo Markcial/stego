@@ -4,17 +4,15 @@ namespace Stego\Console;
 
 use Stego\Console\Commands\Command;
 use Stego\Console\Commands\Stdio\IOTerm;
+use Stego\ContainerAware;
 use Stego\Packages\Compiler;
-use Stego\Service;
 
 class Application
 {
-    /** @var Service */
-    protected $service;
+    use ContainerAware;
+
     /** @var IOTerm */
     protected $stdio;
-    /** @var Command[] */
-    protected $commands;
 
     public function __construct()
     {
@@ -25,12 +23,9 @@ class Application
 Stego    |||  |||-' atomic package manager for PHP.
 BANNER;
 
-        $this->service = new Service();
         //$version = $this->service->getVersion();
 
-        foreach ($this->getCommands() as $command) {
-            $command->setApplication($this);
-        }
+
     }
 
     /**
@@ -39,7 +34,7 @@ BANNER;
     public function getStdio()
     {
         if (is_null($this->stdio)) {
-            $this->stdio = $this->service->getDi()->get('stego:console:stdio');
+            $this->stdio = $this->getContainer()->get('stego:console:stdio');
         }
 
         return $this->stdio;
@@ -65,7 +60,7 @@ BANNER;
      */
     public function getCompiler()
     {
-        return $this->service->getDi()->get('stego:compiler');
+        return $this->getContainer()->get('stego:compiler');
     }
 
     /**
@@ -73,27 +68,8 @@ BANNER;
      * @return Command
      */
     protected function getCommand($name) {
-        if (!array_key_exists($name, $this->commands)) {
-            throw new \RuntimeException(sprintf('Command named %s not found', $name));
-        }
-
-        return $this->commands[$name];
-    }
-
-    /**
-     * @return array|Command[]
-     */
-    public function getCommands()
-    {
-        if (is_null($this->commands)) {
-            $di = $this->service->getDi();
-            $this->commands = array(
-//                $di->get('stego:commands:install'),
-                'loader' => $di->get('stego:console:commands:loader'),
-//                $di->get('stego:commands:search'),
-            );
-        }
-
-        return $this->commands;
+        $command = $this->getContainer()->get(sprintf('stego:console:commands:%s', $name));
+        $command->setApplication($this);
+        return $command;
     }
 }
