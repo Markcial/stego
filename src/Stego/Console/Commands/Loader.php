@@ -2,15 +2,10 @@
 
 namespace Stego\Console\Commands;
 
-use Composer\Package\Link;
-use Stego\Packages\Compiler;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-
-class Loader extends BaseCommand
+class Loader
 {
+    use Command;
+/*
     protected function configure()
     {
         $this
@@ -18,11 +13,12 @@ class Loader extends BaseCommand
             ->setDescription('Creates the autoloader.')
         ;
     }
-
-    public function execute(InputInterface $input, OutputInterface $output)
+*/
+    public function execute()
     {
+        $di = $this->getContainer();
 
-        $pharFile = 'deps' . DIRECTORY_SEPARATOR . 'stego.phar';
+        $pharFile = $di->get('stego:vars:build:dest');
 
         if (file_exists($pharFile)) {
             @unlink($pharFile);
@@ -32,13 +28,12 @@ class Loader extends BaseCommand
         $phar->setSignatureAlgorithm(\Phar::SHA1);
         $phar->startBuffering();
 
-        $phar->addFromString('loader.php', file_get_contents('src/loader.php'));
+        $phar->buildFromDirectory($di->get('stego:vars:fs:src'));
 
         $stub = <<<STUB
 <?php
-Phar::mapPhar('stego.phar');
-require 'phar://stego.phar/loader.php';
-return new StegoLoader();
+Phar::mapPhar('{$di->get('stego:vars:build:pharname')}');
+require 'phar://{$di->get('stego:vars:build:pharname')}/functions.php';
 __HALT_COMPILER();
 ?>
 STUB;

@@ -2,10 +2,12 @@
 
 namespace Stego;
 
+use Stego\Packages\Locator;
+
 spl_autoload_register(function ($class) {
     $file = preg_replace('#\\\|_(?!.+\\\)#', '/', $class) . '.php';
     $path = __DIR__ . DIRECTORY_SEPARATOR . $file;
-    if (stream_resolve_include_path($path)) {
+    if (stream_resolve_include_path($path) || file_exists($path)) {
         require $path;
     }
 });
@@ -30,7 +32,9 @@ function service()
  */
 function import($vendor, $version = 'latest')
 {
+    /** @var Loader $loader */
     static $loader;
+    /** @var Locator $locator */
     static $locator;
 
     if (!isset($loader)) {
@@ -41,9 +45,29 @@ function import($vendor, $version = 'latest')
         $locator = service()->getDi()->get('stego:locator');
     }
 
-    $location = $locator->locate($vendor, $version);
-
-    var_dump($location);
+    if ($location = $locator->locate($vendor, $version)) {
+        $metadata = service()->getDi()->get('stego:vars:deps:metadata');
+        $metadata = json_decode($metadata, true);
+        // psr-0
+        if (
+            array_key_exists('autoload', $metadata) &&
+            array_key_exists('psr-0', $metadata['autoload'])
+        ) {
+            foreach ($metadata['autoload']['psr-0'] as $ns => $path) {
+                $loader->addPsr0Path('phar://' . $location . DIRECTORY_SEPARATOR . $path);
+            }
+        }
+        // psr-4
+        if (
+            array_key_exists('autoload', $metadata) &&
+            array_key_exists('psr-4', $metadata['autoload'])
+        ) {
+            foreach ($metadata['autoload']['psr-4'] as $prefix => $path) {
+                $loader->addPsr4Path($prefix, 'phar://' . $location . DIRECTORY_SEPARATOR . $path);
+            }
+        }
+        $loader->bootstrap();
+    }
 }
 
 /**

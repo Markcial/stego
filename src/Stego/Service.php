@@ -9,21 +9,28 @@ class Service
 
     protected $version = '0.1b';
 
-    public function __construct()
+    public function __construct($config = array())
     {
-        $this->container = new Container(array(
+        $config = array_merge(array(
             'stego:loader' => '#Stego\Loader',
             'stego:compiler' => '#Stego\Packages\Compiler',
             'stego:inspector' => '#Stego\Packages\Inspector',
             'stego:locator' => '#Stego\Packages\Locator',
-            'stego:vars:fs:src' => dirname(__DIR__),
-            'stego:vars:fs:root' => dirname(dirname(__DIR__)),
-            'stego:vars:deps:metadata' => 'composer.json',
+            'stego:console:stdio' => '#Stego\Console\Commands\Stdio\IOTerm',
+//            'stego:console:commands:install' => '#Stego\Console\Commands\Install',
+            'stego:console:commands:loader' => '#Stego\Console\Commands\Loader',
+//            'stego:console:commands:search' => '#Stego\Console\Commands\Search',
+            'stego:vars:fs:root' => getcwd(),
+            'stego:vars:fs:src' => '%{fs:root}/src',
+            'stego:vars:deps:metadata' => '@phar://%{deps:dynamic}/composer.json',
             'stego:vars:deps:folder' => 'deps',
-            'stego:vars:deps:pharname' => 'pkg.phar',
+            'stego:vars:deps:pharname' => 'package.phar',
             'stego:vars:deps:path' => '%{fs:root}/%{deps:folder}',
-            //'stego:vars:deps:schema' => '%{deps:path}/{}',
-        ));
+            'stego:vars:deps:dynamic' => '%{deps:path}/%{dyn:vendor}/%{dyn:version}/%{deps:pharname}',
+            'stego:vars:build:pharname' => 'stego.phar',
+            'stego:vars:build:dest' => '%{fs:root}/%{deps:folder}/%{build:pharname}',
+        ), $config);
+        $this->container = new Container($config);
     }
 
     /**

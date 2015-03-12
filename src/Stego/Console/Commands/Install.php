@@ -3,26 +3,16 @@
 
 namespace Stego\Console\Commands;
 
-use Composer\DependencyResolver\DefaultPolicy;
-use Composer\DependencyResolver\Pool;
-use Composer\DependencyResolver\Request;
-use Composer\DependencyResolver\Solver;
-use Composer\DependencyResolver\SolverProblemsException;
 use Composer\Installer;
-use Composer\Package\AliasPackage;
 use Composer\Package\Link;
-use Composer\Package\LinkConstraint\VersionConstraint;
 use Composer\Package\Package;
 use Composer\Package\RootPackage;
-use Composer\Repository\CompositeRepository;
-use Composer\Repository\InstalledArrayRepository;
-use Composer\Repository\PlatformRepository;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Install extends BaseCommand
+class Install extends Command
 {
     const BASE = 'deps';
     const PHAR_NAME = 'pkg.phar';

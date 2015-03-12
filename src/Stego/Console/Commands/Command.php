@@ -2,66 +2,20 @@
 
 namespace Stego\Console\Commands;
 
+use Stego\Console\ApplicationAware;
 
-use Composer\Composer;
-use Composer\DependencyResolver\Pool;
-use Composer\Factory;
-use Composer\IO\ConsoleIO;
-use Composer\Package\Package;
-use Composer\Package\Version\VersionParser;
-use Composer\Repository\CompositeRepository;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-
-class BaseCommand extends Command
+trait Command
 {
-    /** @var InputInterface */
-    protected $input;
-    /** @var OutputInterface */
-    protected $output;
-    /** @var ConsoleIO */
-    protected $consoleIO;
-    /** @var Composer */
-    protected $composer;
+    use ApplicationAware;
 
-    /**
-     * @return ConsoleIO
-     */
-    protected function getConsoleIO()
-    {
-        return $this->consoleIO;
-    }
-
-    /**
-     * @return Composer
-     */
-    protected function getComposer()
-    {
-        if (is_null($this->composer)) {
-            $this->composer = Factory::create($this->getConsoleIO(), null, true);
-        }
-
-        return $this->composer;
-    }
-
-    /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     */
-    protected function initialize(InputInterface $input, OutputInterface $output)
-    {
-        $this->input = $input;
-        $this->output = $output;
-        $this->consoleIO = new ConsoleIO($input, $output, $this->getHelperSet());
-        parent::initialize($input, $output);
-    }
+    abstract public function execute();
 
     /**
      * @param $name
      * @param $version
      * @return bool|Package
      */
+    /*
     protected function searchPackage($name, $version = '@stable')
     {
         $localRepo = $this->getComposer()->getRepositoryManager()->getLocalRepository();
@@ -89,5 +43,5 @@ class BaseCommand extends Command
         }
 
         return $package;
-    }
+    }*/
 } 
