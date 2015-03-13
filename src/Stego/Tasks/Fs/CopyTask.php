@@ -22,6 +22,7 @@ class CopyTask
 
     private function doCopy($from, $to)
     {
+        $this->out('%[debug]' .sprintf('Copying "%s" to "%s".', $from, $to));
         if (is_link($from)) {
             return symlink(readlink($from), $to);
         }

@@ -34,7 +34,6 @@ class Loader
         spl_autoload_register(function ($class) use ($psr0Paths) {
             $file = preg_replace('#\\\|_(?!.+\\\)#', '/', $class) . '.php';
             foreach ($psr0Paths as $path) {
-                var_dump($path . $file);
                 if (stream_resolve_include_path($path . $file) || file_exists($path . $file)) {
                     require $path . $file;
                 }

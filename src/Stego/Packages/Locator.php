@@ -20,7 +20,11 @@ class Locator
             return $path;
         }
 
-        // maybe the dependency is located in the inside of the phar
-        var_dump(__DIR__);die;
+        // maybe the dependency is located in the vendor folder
+        $path = $di->get('vars:fs:vendor');
+        $libPath = $path . DIRECTORY_SEPARATOR . $vendor;
+        if (stream_resolve_include_path($libPath) || file_exists($libPath)) {
+            return $libPath;
+        }
     }
 }

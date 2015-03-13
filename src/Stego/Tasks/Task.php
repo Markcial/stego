@@ -3,6 +3,7 @@
 namespace Stego\Tasks;
 
 use Stego\Builder;
+use Stego\Console\Commands\Stdio\IOTerm;
 use Stego\ContainerAware;
 
 trait Task
@@ -14,6 +15,8 @@ trait Task
     protected $params;
     /** @var Builder */
     protected $builder;
+    /** @var IOTerm */
+    protected $console;
 
     /**
      * @param array $params
@@ -73,10 +76,24 @@ trait Task
     public function getParam($name)
     {
         if (array_key_exists($name, $this->params)) {
-            return $this->getContainer()->parse($this->params[$name]);
+            return $this->params[$name];
         }
 
         return false;
+    }
+
+    private function getConsole()
+    {
+        if (is_null($this->console)) {
+            $this->console = $this->getContainer()->get('console:stdio');
+        }
+
+        return $this->console;
+    }
+
+    public function out($message)
+    {
+        return $this->getConsole()->write($message);
     }
 
     public function getParams()
@@ -90,6 +107,10 @@ trait Task
             if (!array_key_exists($req, $this->params)) {
                 throw new \RuntimeException(sprintf('Missing required parameter : "%s".', $req));
             }
+        }
+
+        foreach ($this->params as &$param) {
+            $param = $this->getContainer()->parse($param);
         }
     }
 }

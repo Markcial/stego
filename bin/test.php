@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 //system('bin/stego install doctrine/common -c2.4');
-system('bin/stego loader');
+//system('bin/stego loader');
 
 require 'deps/stego.phar';
 

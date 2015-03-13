@@ -1,0 +1,6 @@
+#!/usr/bin/php -dphar.readonly = 0
+<?php
+
+require_once 'src/functions.php';
+
+Stego\task('build');

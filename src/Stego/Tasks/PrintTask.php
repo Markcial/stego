@@ -2,8 +2,6 @@
 
 namespace Stego\Tasks;
 
-use Stego\Console\Commands\Stdio\IOTerm;
-
 class PrintTask
 {
     use Task;
@@ -15,10 +13,7 @@ class PrintTask
 
     public function doTask()
     {
-        /** @var IOTerm $console */
-        $console = $this->getContainer()->get('console:stdio');
-        $message = $this->getParam('message');
-        $console->write($message);
+        $this->out($this->getParam('message'));
         return 0;
     }
 }

@@ -18,19 +18,24 @@ return array(
         'print' => array('message' => '%[comment]Copying source.'),
         'copy' => array('from' => '%{fs:src}', 'to' => '%{build:tmp}/src'),
     ),
-    '!job:copy:deps' => array(
-        'print' => array('message' => '%[comment]Copying source.'),
+    '!job:copy:deps:guzzle' => array(
+        'print' => array('message' => '%[comment]Copying guzzle dependencies.'),
         'copy' => array('from' => '%{build:guzzle:src}', 'to' => '%{build:tmp}/src'),
+    ),
+    '!job:copy:deps:sfevt' => array(
+        'print' => array('message' => '%[comment]Copying symfony event dispatcher dependencies.'),
+        'copy' => array('from' => '%{build:sf:evt:src}', 'to' => '%{build:tmp}/src'),
     ),
     '!job:make:phar' => array(
         'phar' => array(
-            'source' => '',
-            'pharname' => ''
+            'source' => '%{build:tmp}/src',
+            'destination' => '%{build:dest}',
+            'bootstrap' => 'phar://%{build:pharname}/functions.php',
         ),
     ),
     '!job:build' => array(
         'print' => array('message' => '%[comment]Building file'),
-        'depends' => array('clean', 'copy:source', 'copy:deps', 'make:phar')
+        'depends' => array('clean', 'copy:source', 'copy:deps:guzzle', 'copy:deps:sfevt', 'make:phar')
     ),
     '!console:stdio' => '#Stego\Console\Commands\Stdio\IOTerm',
     '!console:application' => '#Stego\Console\Application',
@@ -50,4 +55,5 @@ return array(
     '!vars:build:tmp' => '%{fs:root}/build',
     '!vars:build:dest' => '%{fs:root}/%{deps:folder}/%{build:pharname}',
     '!vars:build:guzzle:src' => '%{fs:vendor}/guzzle/guzzle/src',
+    '!vars:build:sf:evt:src' => '%{fs:vendor}/symfony/event-dispatcher',
 );
