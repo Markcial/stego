@@ -13,9 +13,11 @@ script:
   - vendor/bin/phpunit
   - vendor/bin/phpcs -n --standard=phpcs.xml ./
   - vendor/bin/php-cs-fixer --diff --dry-run -vv fix
-
+  
+after_script:
+  - php vendor/bin/coveralls -v
+  
 matrix:
   allow_failures:
-    - php: hhvm
-    - php: hhvm-nightly
+    - php: 7.0
   fast_finish: true
