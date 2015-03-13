@@ -4,7 +4,6 @@ namespace Stego;
 
 /**
  * TODO:
- * - add psr4 support
  * - add includes support
  * - add class map support
  * - add bin calls support

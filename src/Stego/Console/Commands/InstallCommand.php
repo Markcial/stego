@@ -47,11 +47,11 @@ class InstallCommand
      */
     protected function install($package)
     {
-        $tmp = $this->getContainer()->get('stego:vars:fs:tmp');
+        $tmp = $this->getContainer()->get('vars:fs:tmp');
         /** @var Package $package */
         $this->getComposer()->getDownloadManager()->download($package, $tmp);
 
-        $this->getContainer()->get('stego:compiler')->compile($package, $tmp);
+        $this->getContainer()->get('compiler')->compile($package, $tmp);
 
         @unlink($tmp);
 

@@ -111,7 +111,7 @@ class Output
     public function write($msg)
     {
         $isError = false;
-        $pattern = sprintf('!^(%%\{(?P<tag>%s)\})!', implode('|', $this->severities));
+        $pattern = sprintf('!^%%\[(?P<tag>%s)\]!', implode('|', $this->severities));
         if (preg_match($pattern, $msg, $matches)) {
             $msg = preg_replace_callback($pattern, function ($matches) use (&$isError) {
                 if (in_array($matches['tag'], array(self::WARNING, self::FATAL, self::ERROR))) {

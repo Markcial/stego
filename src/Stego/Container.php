@@ -12,6 +12,10 @@ class Container
     protected $di;
     /** @var \SplObjectStorage */
     protected $cache;
+    /** @var array */
+    protected $guards = array();
+    /** @var string */
+    protected $guardKey = '!';
 
     public function __construct($deps = array())
     {
@@ -26,13 +30,18 @@ class Container
     /**
      * @param $name
      * @param $dep
-     * @throws \Exception
      */
     public function set($name, $dep)
     {
-        if (preg_match('!^stego:!', $name) && property_exists($this->di, $name)) {
-            throw new \RuntimeException(sprintf('Protected property "%s" has already been set.', $name));
+        // wants protection for the variable?
+        $wantsProtect = $this->wantsProtect($name);
+        $name = $this->cleanParam($name);
+
+        // do we have that property inside but already protected?
+        if ($this->isProtected($name)) {
+            return trigger_error(sprintf('The property named "%s" is set as read only.', $this->cleanParam($name)));
         }
+
         if (is_string($dep)) {
             if (preg_match('!^#!', $dep)) {
 
@@ -47,6 +56,48 @@ class Container
         }
 
         $this->di->{$name} = $dep;
+        if ($wantsProtect) {
+            $this->guards[$name] = true;
+        }
+    }
+
+    public function has($name)
+    {
+        // wildcard ?
+        if ($this->usesWildcard($name)) {
+            return (bool)$this->getValidKeys($name);
+        }
+
+        return property_exists($this->di, $name);
+    }
+
+    private function getValidKeys($name)
+    {
+        $pattern = str_replace('*', '[^:]*', $name);
+        $keys = array_keys(get_object_vars($this->di));
+        return array_filter($keys, function ($key) use ($pattern) {
+            return preg_match(sprintf('!^%s$!', $pattern), $key);
+        });
+    }
+
+    public function isProtected($name)
+    {
+        return property_exists($this->di, $name) && array_key_exists($name, $this->guards);
+    }
+
+    private function wantsProtect($name)
+    {
+        return strpos($name, $this->guardKey) === 0;
+    }
+
+    private function usesWildcard($name)
+    {
+        return strpos($name, '*') !== false;
+    }
+
+    private function cleanParam($param)
+    {
+        return $this->wantsProtect($param) ? substr($param, strlen($this->guardKey), strlen($param)) : $param;
     }
 
     /**
@@ -59,14 +110,55 @@ class Container
             return preg_replace_callback(
                 '!%\{(?P<var>[^}]+)\}!m',
                 function ($match) {
-                    if ($var = $this->get(sprintf('stego:vars:%s', $match['var']))) {
-                        return $var;
-                    }
-
                     return $this->get(sprintf('vars:%s', $match['var']));
                 },
                 $dependency
             );
+        }
+
+        return $dependency;
+    }
+
+    private function search($name)
+    {
+        $keys = $this->getValidKeys($name);
+        // php 5.4 support
+        $di = $this->di;
+        return array_map(function ($key) use (&$di) {
+            return $di->{$key};
+        }, $keys);
+    }
+
+    // wildcard search
+    public function find($name)
+    {
+        if (!$this->usesWildcard($name)) {
+            return trigger_error(sprintf('The parameter "%s" does not contain wilcard for pattern matching.', $name));
+        }
+
+        $dependencies = $this->search($name);
+
+        return array_map(array($this, 'warmUpDependency'), $dependencies);
+    }
+
+    public function parse($var)
+    {
+        return $this->applyVars($var);
+    }
+
+    private function warmUpDependency($dependency)
+    {
+        if (is_string($dependency)) {
+            $dependency = $this->applyVars($dependency);
+
+            // is a file read?
+            if (preg_match('!^@!', $dependency)) {
+                return file_get_contents(substr($dependency, 1, strlen($dependency)));
+            }
+        }
+
+        if (is_callable($dependency)) {
+            $dependency = $this->call($dependency);
         }
 
         return $dependency;
@@ -78,31 +170,16 @@ class Container
      */
     public function get($name)
     {
-        $dependency = null;
-        if (property_exists($this->di, $name)) {
-            $dependency = $this->di->{$name};
-        } elseif (property_exists($this->di, $pname = sprintf('stego:%s',$name))) {
-            $dependency = $this->di->{$pname};
+        if (!$this->has($name)) {
+            return trigger_error(sprintf('Dependency/es named "%s" were not found.', $name));
         }
 
-        if ($dependency) {
-            if (is_string($dependency)) {
-                $dependency = $this->applyVars($dependency);
-
-                // is a file read?
-                if (preg_match('!^@!', $dependency)) {
-                    return file_get_contents(substr($dependency, 1, strlen($dependency)));
-                }
-            }
-
-            if (is_callable($dependency)) {
-                $dependency = $this->call($dependency);
-            }
-
-            return $dependency;
+        // wildcard search
+        if ($this->usesWildcard($name)) {
+            return array_map(array($this, 'warmUpDependency'), $this->find($name));
         }
 
-        return false;
+        return $this->warmUpDependency($this->di->{$name});
     }
 
     /**
@@ -175,7 +252,7 @@ class Container
         foreach ($parameters as $param) {
             if (is_null($param->getClass())) {
                 if (!$param->isOptional()) {
-                    throw new \Exception('Basic type parameters are not allowed.');
+                    trigger_error('Basic type parameters are not allowed.');
                 } else {
                     continue;
                 }

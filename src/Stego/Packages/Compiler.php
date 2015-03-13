@@ -23,10 +23,10 @@ class Compiler implements CompilerInterface
     public function compile($package, $source)
     {
         $container = $this->getContainer();
-        $container->set('stego:vars:dyn:vendor', $package->getName());
-        $container->set('stego:vars:dyn:version', $package->getVersion());
+        $container->set('vars:dyn:vendor', $package->getName());
+        $container->set('vars:dyn:version', $package->getVersion());
 
-        $pharDestination = $container->get('stego:vars:deps:dynamic');
+        $pharDestination = $container->get('vars:deps:dynamic');
         $dir = dirname($pharDestination);
 
         if (!file_exists($dir)) {

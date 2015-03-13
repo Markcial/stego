@@ -62,28 +62,46 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     {
         //prefixed stego: dependencies are protected
         $container = new Container();
-        $container->set('stego:foo', 'bar');
+        $container->set('!foo', 'bar');
         try {
-            $container->set('stego:foo', 'eggs');
+            $container->set('!foo', 'eggs');
         } catch (\RuntimeException $exc) {
-            $this->assertEquals('Protected property "stego:foo" has already been set.', $exc->getMessage());
+            $this->assertEquals('The property named "foo" is set as read only.', $exc->getMessage());
         }
 
-        // without the stego: prefix can be overwritten
-        $container->set('foo', new \stdClass());
-        $container->set('foo', new SimpleObject());
+        $this->assertEquals('bar', $container->get('foo'));
 
-        $this->assertTrue($container->get('foo') instanceof SimpleObject);
+        // without the stego: prefix can be overwritten
+        $container->set('bar', new \stdClass());
+        $container->set('bar', new SimpleObject());
+
+        $this->assertTrue($container->get('bar') instanceof SimpleObject);
     }
 
     public function testVariableReplacement()
     {
         $container = new Container();
-        $container->set('stego:vars:foo', '%{bar}, %{dyn:dummy}%{dyn:excl}');
-        $container->set('stego:vars:bar', 'yay');
+        $container->set('!vars:foo', '%{bar}, %{dyn:dummy}%{dyn:excl}');
+        $container->set('!vars:bar', 'yay');
         $container->set('vars:dyn:dummy', 'it works');
         $container->set('vars:dyn:excl', '!');
 
         $this->assertEquals($container->get('vars:foo'), 'yay, it works!');
+    }
+
+    public function testWildcards()
+    {
+        $container = new Container();
+        $container->set('vars:foo', 'foo');
+        $container->set('vars:bar', 'bar');
+        $container->set('vars:bacon', 'bacon');
+        $container->set('vars:eggs', 'eggs');
+
+        $vars = $container->get('vars:*');
+
+        $this->assertContains('foo', $vars);
+        $this->assertContains('bar', $vars);
+        $this->assertContains('bacon', $vars);
+        $this->assertContains('eggs', $vars);
     }
 }

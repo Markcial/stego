@@ -12,9 +12,9 @@ class Locator
     public function locate($vendor, $version = 'latest')
     {
         $di = $this->getContainer();
-        $di->set('stego:vars:dyn:vendor', $vendor);
-        $di->set('stego:vars:dyn:version', $version);
-        $path = $di->get('stego:vars:deps:dynamic');
+        $di->set('vars:dyn:vendor', $vendor);
+        $di->set('vars:dyn:version', $version);
+        $path = $di->get('vars:deps:dynamic');
 
         if (stream_resolve_include_path($path) || file_exists($path)) {
             return $path;

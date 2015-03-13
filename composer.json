@@ -2,7 +2,8 @@
     "name": "markcial/stego",
     "description": "Atomic dependency package manager.",
     "require": {
-        "composer/composer": "dev-master"
+        "composer/composer": "dev-master",
+        "guzzle/guzzle": "@stable"
     },
     "require-dev": {
         "phpunit/phpunit": "@stable",

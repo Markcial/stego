@@ -18,7 +18,7 @@ function service()
     static $service;
 
     if (!isset($service)) {
-        $service = new Service();
+        $service = new Service(require 'configuration.php');
     }
 
     return $service;
@@ -36,15 +36,15 @@ function import($vendor, $version = 'latest')
     static $locator;
 
     if (!isset($loader)) {
-        $loader = service()->getDi()->get('stego:loader');
+        $loader = service()->getDi()->get('loader');
     }
 
     if (!isset($locator)) {
-        $locator = service()->getDi()->get('stego:locator');
+        $locator = service()->getDi()->get('locator');
     }
 
     if ($location = $locator->locate($vendor, $version)) {
-        $metadata = service()->getDi()->get('stego:vars:deps:metadata');
+        $metadata = service()->getDi()->get('vars:deps:metadata');
         $metadata = json_decode($metadata, true);
         // fallback psr-0
         $loader->addPsr0Path('phar://' . $location . DIRECTORY_SEPARATOR);
@@ -73,10 +73,7 @@ function import($vendor, $version = 'latest')
 }
 
 // we use the guzzle http library, so we load it
-import('guzzle/guzzle', '3.9.2.0');
-import('composer/composer', '1.0.9999999.9999999-dev');
-import('symfony/console', '2.6.4.0');
-
+//import('guzzle/guzzle', '3.9.2.0');
 //require_once 'vendor/autoload.php';
 
 function shell()
@@ -99,6 +96,17 @@ function run()
     }
 
     $app->run();
+}
+
+function task($name)
+{
+    static $builder;
+
+    if (!isset($builder)) {
+        $builder = service()->getBuilder();
+    }
+
+    return $builder->run($name);
 }
 
 /**

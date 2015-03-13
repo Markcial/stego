@@ -37,7 +37,7 @@ BANNER;
     public function getStdio()
     {
         if (is_null($this->stdio)) {
-            $this->stdio = $this->getContainer()->get('stego:console:stdio');
+            $this->stdio = $this->getContainer()->get('console:stdio');
         }
 
         return $this->stdio;
@@ -79,7 +79,7 @@ BANNER;
         try {
             $command = $this->getCommand($name);
         } catch (MissingDependencyException $exc) { // create exception for not found dependencies
-            $this->getStdio()->write('%{error}' . $exc->getMessage());
+            $this->getStdio()->write('%[error]' . $exc->getMessage());
             return $this->runCommand('usage');
         }
 
@@ -102,7 +102,7 @@ avaliable commands
     exit
 HELP;
 
-        $this->getStdio()->write('%{info}' . $usage);
+        $this->getStdio()->write('%[info]' . $usage);
     }
 
     /**
@@ -111,7 +111,7 @@ HELP;
      */
     protected function getCommand($name)
     {
-        $command = $this->getContainer()->get(sprintf('stego:console:commands:%s', $name));
+        $command = $this->getContainer()->get(sprintf('console:commands:%s', $name));
         $command->setApplication($this);
         return $command;
     }
