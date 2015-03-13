@@ -15,7 +15,7 @@ script:
   - vendor/bin/php-cs-fixer --diff --dry-run -vv fix
   
 after_script:
-  - php vendor/bin/coveralls -v
+  - vendor/bin/coveralls -v
   
 matrix:
   allow_failures:
