@@ -2,48 +2,52 @@
 
 namespace Stego\Packages;
 
-use Composer\Package\Package;
 use Stego\ContainerAware;
-use Symfony\Component\Finder\Iterator\RecursiveDirectoryIterator;
 
-class Compiler implements CompilerInterface
+class Compiler
 {
     use ContainerAware;
 
-    protected function createStub($pharName)
+    private function createStub($pharName, $bootstrap = false)
     {
-        $stub = "<?php\n";
-        $stub .= sprintf("Phar::mapPhar('%s');\n", $pharName);
+        $stub = '<?php' . "\n";
+        $stub .= sprintf('Phar::mapPhar("%s");', $pharName) . "\n";
+        if ($bootstrap) {
+            $stub .= sprintf('require "%s";', $bootstrap) . "\n";
+        }
         $stub .= '__HALT_COMPILER();' . "\n";
         $stub .= '?>' . "\n";
 
         return $stub;
     }
 
-    public function compile($package, $source)
+    public function compile($destination, $source, $bootstrap = false, $metadata = false)
     {
-        $container = $this->getContainer();
-        $container->set('vars:dyn:vendor', $package->getName());
-        $container->set('vars:dyn:version', $package->getVersion());
+        $pharName = basename($destination);
 
-        $pharDestination = $container->get('vars:deps:dynamic');
-        $dir = dirname($pharDestination);
+        $dir = dirname($destination);
 
         if (!file_exists($dir)) {
+            trigger_error('Destination folder does not exists, creating it.');
             @mkdir($dir, 0777, true);
         }
 
-        if (file_exists($pharDestination)) {
-            @unlink($pharDestination);
+        if (file_exists($destination)) {
+            trigger_error('Destination file already exists, removing.');
+            @unlink($destination);
         }
 
-        $phar = new \Phar($pharDestination, 0, basename($pharDestination));
+        $phar = new \Phar($destination, 0, $pharName);
         $phar->setSignatureAlgorithm(\Phar::SHA1);
         $phar->startBuffering();
 
         $phar->buildFromDirectory(realpath($source));
 
-        $phar->setStub($this->createStub(basename($pharDestination)));
+        $phar->setStub($this->createStub($pharName, $bootstrap));
+
+        if ($metadata) {
+            $phar->setMetadata($metadata);
+        }
 
         $phar->stopBuffering();
 

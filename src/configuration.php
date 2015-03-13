@@ -35,7 +35,7 @@ return array(
     ),
     '!job:build' => array(
         'print' => array('message' => '%[comment]Building file'),
-        'depends' => array('clean', 'copy:source', 'copy:deps:guzzle', 'copy:deps:sfevt', 'make:phar')
+        'depends' => array('clean', 'copy:source', 'copy:deps:guzzle', 'copy:deps:sfevt', 'make:phar'),
     ),
     '!console:stdio' => '#Stego\Console\Commands\Stdio\IOTerm',
     '!console:application' => '#Stego\Console\Application',

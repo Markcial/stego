@@ -106,6 +106,7 @@ class Output
 
     /**
      * @param $msg
+     *
      * @return int
      */
     public function write($msg)
@@ -117,6 +118,7 @@ class Output
                 if (in_array($matches['tag'], array(self::WARNING, self::FATAL, self::ERROR))) {
                     $isError = true;
                 }
+
                 return implode(self::$formats[$matches['tag']]);
             }, $msg);
             $msg .= self::C_RESET;
@@ -125,6 +127,7 @@ class Output
         if ($isError) {
             return fwrite($this->getStdErr(), $msg);
         }
+
         return fwrite($this->getStdOut(), $msg);
     }
 }

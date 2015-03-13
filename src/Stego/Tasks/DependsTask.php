@@ -6,10 +6,6 @@ class DependsTask
 {
     use Task;
 
-    protected function init()
-    {
-    }
-
     protected function doTask()
     {
         foreach ($this->getParams() as $job) {

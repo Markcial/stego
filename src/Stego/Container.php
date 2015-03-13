@@ -5,7 +5,7 @@ namespace Stego;
 class Container
 {
     /**
-     * TODO add environment replacement variables support
+     * TODO add environment replacement variables support.
      */
 
     /** @var \stdClass */
@@ -30,6 +30,8 @@ class Container
     /**
      * @param $name
      * @param $dep
+     *
+     * @throws \Exception
      */
     public function set($name, $dep)
     {
@@ -44,14 +46,12 @@ class Container
 
         if (is_string($dep)) {
             if (preg_match('!^#!', $dep)) {
-
                 $class = substr($dep, 1, strlen($dep));
                 if (!class_exists($class, true)) {
                     throw new \Exception(sprintf('Class "%s" not found.', $class));
                 }
 
                 $dep = $this->newInstance(new \ReflectionClass($class));
-
             }
         }
 
@@ -65,7 +65,7 @@ class Container
     {
         // wildcard ?
         if ($this->usesWildcard($name)) {
-            return (bool)$this->getValidKeys($name);
+            return (bool) $this->getValidKeys($name);
         }
 
         return property_exists($this->di, $name);
@@ -75,6 +75,7 @@ class Container
     {
         $pattern = str_replace('*', '[^:]*', $name);
         $keys = array_keys(get_object_vars($this->di));
+
         return array_filter($keys, function ($key) use ($pattern) {
             return preg_match(sprintf('!^%s$!', $pattern), $key);
         });
@@ -102,6 +103,7 @@ class Container
 
     /**
      * @param $dependency
+     *
      * @return mixed
      */
     private function applyVars($dependency)
@@ -124,6 +126,7 @@ class Container
         $keys = $this->getValidKeys($name);
         // php 5.4 support
         $di = $this->di;
+
         return array_map(function ($key) use (&$di) {
             return $di->{$key};
         }, $keys);
@@ -166,6 +169,7 @@ class Container
 
     /**
      * @param $name
+     *
      * @return mixed
      */
     public function get($name)
@@ -212,6 +216,7 @@ class Container
 
     /**
      * @param \ReflectionClass $class
+     *
      * @return array
      */
     private function getTraits(\ReflectionClass $class)
@@ -227,6 +232,7 @@ class Container
 
     /**
      * @param \ReflectionClass $class
+     *
      * @throws \Exception
      *
      * @return object
@@ -274,6 +280,7 @@ class Container
     protected function call(\Closure $closure)
     {
         $closure = \Closure::bind($closure, $this, get_called_class());
+
         return call_user_func($closure);
     }
 }

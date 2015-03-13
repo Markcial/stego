@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Stego\Packages;
 
 use Stego\ContainerAware;

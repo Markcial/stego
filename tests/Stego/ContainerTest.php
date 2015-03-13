@@ -5,8 +5,8 @@ namespace Stego;
 use Stego\Stubs\SimpleObject;
 
 /**
- * Class ContainerTest
- * @package Stego
+ * Class ContainerTest.
+ *
  * @covers Container
  */
 class ContainerTest extends \PHPUnit_Framework_TestCase
@@ -49,7 +49,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
             },
             'test:spam' => function () {
                 return $this->get('vars:set');
-            }
+            },
         );
         $container = new Container($config);
         $container->set('vars:set', 'bacon');
@@ -60,7 +60,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
     public function testProtectedDependencies()
     {
-        //prefixed stego: dependencies are protected
+        //prefixed dependencies are protected
         $container = new Container();
         $container->set('!foo', 'bar');
         try {
@@ -71,7 +71,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('bar', $container->get('foo'));
 
-        // without the stego: prefix can be overwritten
+        // without the prefix can be overwritten
         $container->set('bar', new \stdClass());
         $container->set('bar', new SimpleObject());
 

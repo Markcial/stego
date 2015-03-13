@@ -6,7 +6,6 @@ use Stego\Console\Commands\Command;
 use Stego\Console\Commands\Stdio\IOTerm;
 use Stego\ContainerAware;
 use Stego\Exceptions\MissingDependencyException;
-use Stego\Packages\Compiler;
 
 class Application
 {
@@ -27,8 +26,6 @@ Stego    |||  |||-' atomic package manager for PHP.
 BANNER;
 
         //$version = $this->service->getVersion();
-
-
     }
 
     /**
@@ -80,6 +77,7 @@ BANNER;
             $command = $this->getCommand($name);
         } catch (MissingDependencyException $exc) { // create exception for not found dependencies
             $this->getStdio()->write('%[error]' . $exc->getMessage());
+
             return $this->runCommand('usage');
         }
 
@@ -107,12 +105,14 @@ HELP;
 
     /**
      * @param $name
+     *
      * @return Command
      */
     protected function getCommand($name)
     {
         $command = $this->getContainer()->get(sprintf('console:commands:%s', $name));
         $command->setApplication($this);
+
         return $command;
     }
 }

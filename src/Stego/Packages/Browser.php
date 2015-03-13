@@ -27,7 +27,9 @@ class Browser
     /**
      * @param $name
      * @param null $page
+     *
      * @return array|bool|float|int|string
+     *
      * @throws \HttpException
      */
     public function find($name, $page = null)
@@ -49,7 +51,9 @@ class Browser
     /**
      * @param $name
      * @param string $version
+     *
      * @return mixed
+     *
      * @throws \Exception
      * @throws \HttpException
      */
@@ -68,7 +72,9 @@ class Browser
 
     /**
      * @param $name
+     *
      * @return array|bool|float|int|string
+     *
      * @throws \HttpException
      */
     public function details($name)
@@ -87,7 +93,9 @@ class Browser
     /**
      * @param $name
      * @param string $version
+     *
      * @return Stream
+     *
      * @throws \Exception
      * @throws \HttpException
      */

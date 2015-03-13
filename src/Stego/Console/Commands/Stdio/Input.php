@@ -54,6 +54,7 @@ class Input
             $argv = $_SERVER['argv'];
             $this->args = array_slice($argv, 2);
         }
+
         return $this->args;
     }
 

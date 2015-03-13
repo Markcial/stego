@@ -4,10 +4,12 @@ namespace Stego\Console\Commands\Stdio;
 
 /**
  * Output methods
- * ==============
+ * ==============.
+ *
  * @method write
+ *
  * Input methods
- * ==================
+ * ==================.
  * @method getCommand
  * @method getArgs
  */

@@ -50,6 +50,5 @@ STUB;
         $phar->stopBuffering();
 
         unset($phar);
-
     }
-} 
+}

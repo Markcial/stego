@@ -14,6 +14,7 @@ class PrintTask
     public function doTask()
     {
         $this->out($this->getParam('message'));
+
         return 0;
     }
 }

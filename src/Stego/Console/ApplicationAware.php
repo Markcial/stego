@@ -4,8 +4,8 @@ namespace Stego\Console;
 
 use Stego\ContainerAware;
 
-trait ApplicationAware {
-
+trait ApplicationAware
+{
     use ContainerAware;
 
     /** @var Application */
@@ -34,4 +34,4 @@ trait ApplicationAware {
     {
         return $this->getApplication()->getStdio();
     }
-} 
+}

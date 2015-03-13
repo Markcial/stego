@@ -6,7 +6,7 @@ namespace Stego;
  * TODO:
  * - add includes support
  * - add class map support
- * - add bin calls support
+ * - add bin calls support.
  */
 class Loader
 {
@@ -45,7 +45,6 @@ class Loader
             // project-specific namespace prefix ($prefix)
             // base directory for the namespace prefix ($path)
             foreach ($psr4Paths as $prefix => $path) {
-
                 // does the class use the namespace prefix?
                 $len = strlen($prefix);
                 if (strncmp($prefix, $class, $len) !== 0) {

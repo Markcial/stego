@@ -29,7 +29,7 @@ class SearchCommand extends Command
                         'c',
                         InputOption::VALUE_OPTIONAL,
                         'Version constraint'
-                    )
+                    ),
                 )
             )
         ;
@@ -48,9 +48,9 @@ class SearchCommand extends Command
                 str_pad(substr($result['name'], 0, 20), 20, ' '),
                 str_pad(substr($result['description'], 0, 110), 110, ' '),
                 str_pad($result['downloads'], 8, ' ', STR_PAD_LEFT),
-                chr(0xf0).chr(0x9f).chr(0x92).chr(0xbe),
+                chr(0xf0) . chr(0x9f) . chr(0x92) . chr(0xbe),
                 str_pad($result['favers'], 3, ' ', STR_PAD_LEFT),
-                chr(0xf0).chr(0x9f).chr(0x91).chr(0x8d)
+                chr(0xf0) . chr(0x9f) . chr(0x91) . chr(0x8d)
             );
         }
         $output->writeln($display);

@@ -2,13 +2,13 @@
     "name": "markcial/stego",
     "description": "Atomic dependency package manager.",
     "require": {
-        "composer/composer": "dev-master",
         "guzzle/guzzle": "@stable"
     },
     "require-dev": {
         "phpunit/phpunit": "@stable",
         "mockery/mockery": "@stable",
-        "psy/psysh": "@stable"
+        "squizlabs/php_codesniffer": "@stable",
+        "fabpot/php-cs-fixer": "@stable"
     },
     "license": "MIT",
     "authors": [

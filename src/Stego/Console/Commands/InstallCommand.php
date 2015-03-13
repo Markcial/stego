@@ -1,9 +1,7 @@
 <?php
 
-
 namespace Stego\Console\Commands;
 
-use Composer\Installer;
 use Composer\Package\Link;
 use Composer\Package\Package;
 use Composer\Package\RootPackage;
@@ -12,7 +10,7 @@ class InstallCommand
 {
     use Command;
 
-    /** @var RootPackage */
+    /* @var RootPackage */
     protected $rootPackage;
     protected $localRepo;
     protected $platformRepo;
@@ -48,7 +46,7 @@ class InstallCommand
     protected function install($package)
     {
         $tmp = $this->getContainer()->get('vars:fs:tmp');
-        /** @var Package $package */
+        /* @var Package $package */
         $this->getComposer()->getDownloadManager()->download($package, $tmp);
 
         $this->getContainer()->get('compiler')->compile($package, $tmp);

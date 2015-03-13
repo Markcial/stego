@@ -47,7 +47,9 @@ trait Task
         return $this->builder;
     }
 
-    abstract protected function init();
+    protected function init()
+    {
+    }
 
     abstract protected function doTask();
 
@@ -65,6 +67,7 @@ trait Task
     protected function getTaskName()
     {
         $class = new \ReflectionClass(get_called_class());
+
         return preg_replace('!task$!', '', strtolower($class->getShortName()));
     }
 

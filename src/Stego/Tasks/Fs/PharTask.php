@@ -2,27 +2,30 @@
 
 namespace Stego\Tasks\Fs;
 
+use Stego\Packages\Compiler;
 use Stego\Tasks\Task;
 
 class PharTask
 {
     use Task;
+    /** @var Compiler */
+    protected $compiler;
 
     protected function init()
     {
         $this->setRequired(array('source', 'destination'));
     }
 
-    private function createStub($pharName, $bootstrap = false)
+    /**
+     * @return Compiler
+     */
+    private function getCompiler()
     {
-        $stub = '<?php' . "\n";
-        $stub .= sprintf('Phar::mapPhar("%s");', $pharName) . "\n";
-        if ($bootstrap) {
-            $stub .= sprintf('require "%s";', $bootstrap) . "\n";
+        if (is_null($this->compiler)) {
+            $this->compiler = $this->getContainer()->get('compiler');
         }
-        $stub .= '__HALT_COMPILER();' . "\n";
-        $stub .= '?>' . "\n";
-        return $stub;
+
+        return $this->compiler;
     }
 
     protected function doTask()
@@ -30,30 +33,14 @@ class PharTask
         $source = $this->getParam('source');
         $destination = $this->getParam('destination');
         $bootstrap = $this->getParam('bootstrap');
-        $pharName = basename($destination);
+        $metadata = $this->getParam('metadata');
 
-        $dir = dirname($destination);
+        set_error_handler(function ($code, $message) {
+            $this->out('%[warning]' . $message);
+        });
 
-        if (!file_exists($dir)) {
-            $this->out('%[comment]Destination folder does not exists, creating it.');
-            @mkdir($dir, 0777, true);
-        }
+        $this->getCompiler()->compile($destination, $source, $bootstrap, $metadata);
 
-        if (file_exists($destination)) {
-            $this->out('%[warning]Destination file already exists, removing.');
-            @unlink($destination);
-        }
-
-        $phar = new \Phar($destination, 0, $pharName);
-        $phar->setSignatureAlgorithm(\Phar::SHA1);
-        $phar->startBuffering();
-
-        $phar->buildFromDirectory(realpath($source));
-
-        $phar->setStub($this->createStub($pharName, $bootstrap));
-
-        $phar->stopBuffering();
-
-        unset($phar);
+        return 0;
     }
 }

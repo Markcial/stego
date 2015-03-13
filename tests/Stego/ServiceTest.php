@@ -17,19 +17,20 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
      */
     public function testConfigurationOnService()
     {
-        $this->fail('pending testing');
+        $this->markTestSkipped('test pending');
     }
 
     public function testRetrieveDependencies()
     {
-        $service = new Service();
-        $this->assertTrue($service->getDi()->get('stego:loader') instanceof Loader);
-        $this->assertTrue($service->getDi()->get('stego:compiler') instanceof Compiler);
-        $this->assertTrue($service->getDi()->get('stego:inspector') instanceof Inspector);
-        $this->assertTrue($service->getDi()->get('stego:locator') instanceof Locator);
-        $this->assertTrue($service->getDi()->get('stego:console:stdio') instanceof IOTerm);
-        $this->assertTrue($service->getDi()->get('stego:console:application') instanceof Application);
-        $this->assertTrue($service->getDi()->get('stego:console:commands:install') instanceof InstallCommand);
-        $this->assertTrue($service->getDi()->get('stego:console:commands:loader') instanceof LoaderCommand);
+        $config = require 'src/configuration.php';
+        $service = new Service($config);
+        $this->assertTrue($service->getDi()->get('loader') instanceof Loader);
+        $this->assertTrue($service->getDi()->get('compiler') instanceof Compiler);
+        $this->assertTrue($service->getDi()->get('inspector') instanceof Inspector);
+        $this->assertTrue($service->getDi()->get('locator') instanceof Locator);
+        $this->assertTrue($service->getDi()->get('console:stdio') instanceof IOTerm);
+        $this->assertTrue($service->getDi()->get('console:application') instanceof Application);
+        $this->assertTrue($service->getDi()->get('console:commands:install') instanceof InstallCommand);
+        $this->assertTrue($service->getDi()->get('console:commands:loader') instanceof LoaderCommand);
     }
 }

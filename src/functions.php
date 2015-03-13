@@ -30,9 +30,9 @@ function service()
  */
 function import($vendor, $version = 'latest')
 {
-    /** @var Loader $loader */
+    /* @var Loader $loader */
     static $loader;
-    /** @var Locator $locator */
+    /* @var Locator $locator */
     static $locator;
 
     if (!isset($loader)) {
@@ -49,23 +49,24 @@ function import($vendor, $version = 'latest')
         // fallback psr-0
         $loader->addPsr0Path('phar://' . $location . DIRECTORY_SEPARATOR);
         // psr-0
-        if (
+        if ((
             array_key_exists('autoload', $metadata) &&
             array_key_exists('psr-0', $metadata['autoload'])
-        ) {
+        )) {
             foreach ($metadata['autoload']['psr-0'] as $ns => $path) {
                 $loader->addPsr0Path('phar://' . $location . DIRECTORY_SEPARATOR . $path);
             }
         }
         // psr-4
-        if (
+        if ((
             array_key_exists('autoload', $metadata) &&
             array_key_exists('psr-4', $metadata['autoload'])
-        ) {
+        )) {
             foreach ($metadata['autoload']['psr-4'] as $prefix => $path) {
                 $loader->addPsr4Path($prefix, 'phar://' . $location . DIRECTORY_SEPARATOR . $path);
             }
         }
+
         return $loader->bootstrap();
     }
 
