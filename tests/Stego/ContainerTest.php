@@ -7,7 +7,7 @@ use Stego\Stubs\SimpleObject;
 /**
  * Class ContainerTest.
  *
- * @covers Container
+ * @covers Stego\Container
  */
 class ContainerTest extends \PHPUnit_Framework_TestCase
 {

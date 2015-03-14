@@ -4,10 +4,6 @@ namespace Stego;
 
 class Container
 {
-    /**
-     * TODO add environment replacement variables support.
-     */
-
     /** @var \stdClass */
     protected $di;
     /** @var \SplObjectStorage */

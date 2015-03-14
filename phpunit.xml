@@ -13,10 +13,27 @@
         syntaxCheck                 = "false"
         bootstrap                   = "tests/autoload.php" >
 
+    <!-- Add a filter to make sure we don't count vendors and Tests in the coverage report -->
+    <filter>
+        <whitelist>
+            <directory suffix=".php">./src</directory>
+            <exclude>
+                <directory>./vendor</directory>
+                <directory>./build</directory>
+                <directory>./tests</directory>
+                <directory>./deps</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+
     <testsuites>
         <testsuite name="Project Test Suite">
             <directory>tests/*</directory>
         </testsuite>
     </testsuites>
+
+    <logging>
+        <log type="coverage-clover" target="build/logs/clover.xml"/>
+    </logging>
 
 </phpunit>

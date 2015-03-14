@@ -3,7 +3,7 @@
 namespace Stego\Console\Commands\Stdio;
 
 /**
- * @covers Output
+ * @covers Stego\Console\Commands\Stdio\Output
  */
 class OutputTest extends \PHPUnit_Framework_TestCase
 {

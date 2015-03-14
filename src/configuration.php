@@ -12,7 +12,7 @@ return array(
     '!task:clean' => '#Stego\Tasks\Fs\CleanTask',
     '!task:phar' => '#Stego\Tasks\Fs\PharTask',
     '!job:clean' => array(
-        'clean' => array( '%{build:tmp}/src' ),
+        'clean' => array('%{build:tmp}/src'),
     ),
     '!job:copy:source' => array(
         'print' => array('message' => '%[comment]Copying source.'),

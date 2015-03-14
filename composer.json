@@ -7,6 +7,7 @@
     "require-dev": {
         "phpunit/phpunit": "@stable",
         "mockery/mockery": "@stable",
+        "satooshi/php-coveralls": "@stable",
         "squizlabs/php_codesniffer": "@stable",
         "fabpot/php-cs-fixer": "@stable"
     },

@@ -10,9 +10,9 @@ namespace Stego;
  */
 class Loader
 {
-    /** @var array */
+    /* @var array */
     protected $psr0Paths = array();
-
+    /* @var array */
     protected $psr4Paths = array();
 
     /**
@@ -28,23 +28,21 @@ class Loader
         $this->psr4Paths[$prefix] = $path;
     }
 
-    public function bootstrap()
+    public function __construct()
     {
-        $psr0Paths = $this->psr0Paths;
-        spl_autoload_register(function ($class) use ($psr0Paths) {
+        spl_autoload_register(function ($class) {
             $file = preg_replace('#\\\|_(?!.+\\\)#', '/', $class) . '.php';
-            foreach ($psr0Paths as $path) {
+            foreach ($this->psr0Paths as $path) {
                 if (stream_resolve_include_path($path . $file) || file_exists($path . $file)) {
                     require $path . $file;
                 }
             }
         });
 
-        $psr4Paths = $this->psr4Paths;
-        spl_autoload_register(function ($class) use ($psr4Paths) {
+        spl_autoload_register(function ($class) {
             // project-specific namespace prefix ($prefix)
             // base directory for the namespace prefix ($path)
-            foreach ($psr4Paths as $prefix => $path) {
+            foreach ($this->psr4Paths as $prefix => $path) {
                 // does the class use the namespace prefix?
                 $len = strlen($prefix);
                 if (strncmp($prefix, $class, $len) !== 0) {

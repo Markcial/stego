@@ -3,13 +3,7 @@
 namespace Stego\Console\Commands\Stdio;
 
 /**
- * Output methods
- * ==============.
- *
  * @method write
- *
- * Input methods
- * ==================.
  * @method getCommand
  * @method getArgs
  */
@@ -20,12 +14,20 @@ class IOTerm
     /** @var Output */
     protected $output;
 
+    /**
+     * @param Input $input
+     * @param Output $output
+     */
     public function __construct(Input $input, Output $output)
     {
         $this->input = $input;
         $this->output = $output;
     }
 
+    /**
+     * @param $name
+     * @param $args
+     */
     public function __call($name, $args)
     {
         if (method_exists($this->input, $name)) {
