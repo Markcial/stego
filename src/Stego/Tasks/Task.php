@@ -44,6 +44,10 @@ trait Task
      */
     public function getBuilder()
     {
+        if (is_null($this->builder)) {
+            $this->builder = $this->getContainer()->get('builder');
+        }
+
         return $this->builder;
     }
 

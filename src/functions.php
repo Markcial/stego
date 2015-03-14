@@ -18,7 +18,7 @@ function service()
     static $service;
 
     if (!isset($service)) {
-        $service = new Service(require 'configuration.php');
+        $service = new Service();
     }
 
     return $service;

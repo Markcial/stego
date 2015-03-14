@@ -12,18 +12,20 @@ use Stego\Packages\Locator;
 
 class ServiceTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * @covers Service::__construct
-     */
-    public function testConfigurationOnService()
+    public static function setUpBeforeClass()
     {
-        $this->markTestSkipped('test pending');
+        if (!function_exists('\Stego\service')) {
+            Service::setDefaultConfiguration(getcwd() . '/tests/configuration.php');
+            require getcwd() . '/src/functions.php';
+        }
+        if (!function_exists('assertTrue')) {
+            require getcwd() . '/vendor/phpunit/phpunit/src/Framework/Assert/Functions.php';
+        }
     }
 
     public function testRetrieveDependencies()
     {
-        $config = require 'src/configuration.php';
-        $service = new Service($config);
+        $service = service();
         $this->assertTrue($service->getDi()->get('loader') instanceof Loader);
         $this->assertTrue($service->getDi()->get('compiler') instanceof Compiler);
         $this->assertTrue($service->getDi()->get('inspector') instanceof Inspector);

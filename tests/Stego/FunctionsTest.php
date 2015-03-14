@@ -1,0 +1,98 @@
+<?php
+
+namespace Stego;
+
+class FunctionsTest extends \PHPUnit_Framework_TestCase
+{
+    public static function setUpBeforeClass()
+    {
+        if (!function_exists('\Stego\service')) {
+            Service::setDefaultConfiguration(getcwd() . '/tests/configuration.php');
+            require getcwd() . '/src/functions.php';
+        }
+        if (!function_exists('assertTrue')) {
+            require getcwd() . '/vendor/phpunit/phpunit/src/Framework/Assert/Functions.php';
+        }
+    }
+
+    /**
+     * @backupGlobals enabled
+     */
+    public function testCreateService()
+    {
+        $this->assertTrue(service() instanceof Service);
+    }
+
+    public function testTasks()
+    {
+        global $tasks, $taskName;
+
+        $tasks = array(
+            'foo',
+            'demo',
+            'test',
+            'damn',
+        );
+        $mockTask = array('mocked' => array('message' => 'testing'));
+        $mockedTask = \Mockery::mock('Stego\Task\Task');
+        $mockedTask->shouldReceive('run')->andReturnNull();
+        $mockedTask->shouldReceive('setBuilder')
+            ->andReturnUsing(function ($builder) {
+                $this->assertTrue($builder instanceof Builder);
+
+                return;
+            });
+
+        service()->getDi()->set('task:mocked', $mockedTask);
+        foreach ($tasks as $task) {
+            service()->getDi()->set(sprintf('job:%s', $task), $mockTask);
+            $taskName = $task;
+            task($taskName);
+        }
+    }
+
+    public function testShell()
+    {
+        $app = \Mockery::mock('\Stego\Console\Application');
+        service()->getDi()->set('console:application', $app);
+    }
+
+    public function testServiceMethods()
+    {
+    }
+
+    /**
+     * @backupGlobals enabled
+     */
+    public function testSplAutoloadRegister()
+    {
+        global $currentClass;
+        $classes = array(
+            '\Stego\Stubs\SimpleObject',
+            '\Stego\Stubs\EmptyObject',
+            '\Stego\Service',
+        );
+
+        function preg_replace($pattern, $rep, $class)
+        {
+            global $currentClass;
+            if (!is_null($currentClass)) {
+                assertEquals($pattern, '#\\\\|_(?!.+\\\\)#');
+                assertEquals($rep, '/');
+                assertEquals($class, $currentClass);
+            }
+
+            return \preg_replace($pattern, $rep, $class);
+        }
+
+        foreach ($classes as $class) {
+            $currentClass = substr($class, 1);
+            try {
+                new $class();
+            } catch (\Exception $e) {
+                // is ok, just testing the loader
+                $this->assertEquals($e->getMessage(), 'stop that before the invocation of cthuluh. Here it comes.');
+            }
+        }
+    }
+}
