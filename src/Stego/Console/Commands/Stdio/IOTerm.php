@@ -15,7 +15,7 @@ class IOTerm
     protected $output;
 
     /**
-     * @param Input $input
+     * @param Input  $input
      * @param Output $output
      */
     public function __construct(Input $input, Output $output)

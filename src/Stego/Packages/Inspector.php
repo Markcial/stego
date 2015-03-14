@@ -27,13 +27,15 @@ class Inspector
         if (substr($version, 0, 1) === '~') {
             $pieces = explode(".", $this->getVersionString($version));
             array_pop($pieces);
-            return sprintf("!^%s.*!", implode("\.", $pieces));
+
+            return sprintf("!^%s\..*!", implode("\.", $pieces));
         }
         // caret operator, major upgrades
         if (substr($version, 0, 1) === '^') {
             $version = substr($version, 1, strlen($version));
             $pieces = explode(".", $version);
             $major = array_shift($pieces);
+
             return sprintf("!^%s\..*!", $major);
         }
         // wildcard
@@ -43,7 +45,6 @@ class Inspector
         // hyphen range
         if (strpos($version, ' - ') !== false) {
             $versions = explode(' - ', $version);
-            var_dump($versions);
         }
         // range
 

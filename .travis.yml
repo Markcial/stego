@@ -13,7 +13,7 @@ script:
   - vendor/bin/phpunit
   - vendor/bin/phpcs -n --standard=phpcs.xml ./
   - vendor/bin/php-cs-fixer --diff --dry-run -vv fix
-  
+
 after_script:
   - vendor/bin/coveralls -v
   
