@@ -44,7 +44,7 @@ class Container
             if (preg_match('!^#!', $dep)) {
                 $class = substr($dep, 1, strlen($dep));
                 if (!class_exists($class, true)) {
-                    throw new \Exception(sprintf('Class "%s" not found.', $class));
+                    trigger_error(sprintf('Class "%s" not found.', $class));
                 }
 
                 $dep = $this->newInstance(new \ReflectionClass($class));
@@ -97,58 +97,40 @@ class Container
         return $this->wantsProtect($param) ? substr($param, strlen($this->guardKey), strlen($param)) : $param;
     }
 
-    /**
-     * @param $dependency
-     *
-     * @return mixed
-     */
-    private function applyVars($dependency)
-    {
-        if (preg_match_all('!%\{[^}]+\}!m', $dependency, $matches)) {
-            return preg_replace_callback(
-                '!%\{(?P<var>[^}]+)\}!m',
-                function ($match) {
-                    return $this->get(sprintf('vars:%s', $match['var']));
-                },
-                $dependency
-            );
-        }
-
-        return $dependency;
-    }
-
     private function search($name)
-    {
-        $keys = $this->getValidKeys($name);
-        // php 5.4 support
-        $di = $this->di;
-
-        return array_map(function ($key) use (&$di) {
-            return $di->{$key};
-        }, $keys);
-    }
-
-    // wildcard search
-    public function find($name)
     {
         if (!$this->usesWildcard($name)) {
             return trigger_error(sprintf('The parameter "%s" does not contain wilcard for pattern matching.', $name));
         }
 
-        $dependencies = $this->search($name);
+        $keys = $this->getValidKeys($name);
+
+        $dependencies = array_map(function ($key) {
+            return $this->di->{$key};
+        }, $keys);
 
         return array_map(array($this, 'warmUpDependency'), $dependencies);
     }
 
-    public function parse($var)
+    public function parse($text)
     {
-        return $this->applyVars($var);
+        if (preg_match_all('!%\{[^}]+\}!m', $text, $matches)) {
+            return preg_replace_callback(
+                '!%\{(?P<var>[^}]+)\}!m',
+                function ($match) {
+                    return $this->get(sprintf('vars:%s', $match['var']));
+                },
+                $text
+            );
+        }
+
+        return $text;
     }
 
     private function warmUpDependency($dependency)
     {
         if (is_string($dependency)) {
-            $dependency = $this->applyVars($dependency);
+            $dependency = $this->parse($dependency);
 
             // is a file read?
             if (preg_match('!^@!', $dependency)) {
@@ -176,7 +158,7 @@ class Container
 
         // wildcard search
         if ($this->usesWildcard($name)) {
-            return array_map(array($this, 'warmUpDependency'), $this->find($name));
+            return array_map(array($this, 'warmUpDependency'), $this->search($name));
         }
 
         return $this->warmUpDependency($this->di->{$name});

@@ -23,6 +23,19 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * @runInSeparateProcess
+     */
+    public function testSetDefaultConfiguration()
+    {
+        Service::setDefaultConfiguration('demo.php');
+        try {
+            new Service();
+        } catch (\RuntimeException $e) {
+            $this->assertEquals('Configuration file "demo.php" not found', $e->getMessage());
+        }
+    }
+
     public function testRetrieveDependencies()
     {
         $service = service();

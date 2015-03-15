@@ -12,7 +12,7 @@ trait Task
 
     protected $required = array();
 
-    protected $params;
+    protected $params = array();
     /** @var Builder */
     protected $builder;
     /** @var IOTerm */
@@ -68,7 +68,7 @@ trait Task
     /**
      * @return string
      */
-    protected function getTaskName()
+    public function getTaskName()
     {
         $class = new \ReflectionClass(get_called_class());
 

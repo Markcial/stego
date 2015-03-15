@@ -89,6 +89,10 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($container->get('vars:foo'), 'yay, it works!');
     }
 
+    /**
+     * @covers Stego\Container::set
+     * @covers Stego\Container::get
+     */
     public function testWildcards()
     {
         $container = new Container();
@@ -103,5 +107,14 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertContains('bar', $vars);
         $this->assertContains('bacon', $vars);
         $this->assertContains('eggs', $vars);
+    }
+
+    public function testExceptionOnMissingDependency()
+    {
+        try {
+            new Container(array('non:existant' => '#Missing\Class'));
+        } catch (\Exception $e) {
+            $this->assertEquals('Class "Missing\Class" not found.', $e->getMessage());
+        }
     }
 }

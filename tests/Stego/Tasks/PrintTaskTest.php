@@ -2,8 +2,6 @@
 
 namespace Stego\Tasks;
 
-use Stego\Builder;
-use Stego\Container;
 use Stego\Service;
 
 class PrintTaskTest extends \PHPUnit_Framework_TestCase
@@ -21,12 +19,9 @@ class PrintTaskTest extends \PHPUnit_Framework_TestCase
 
     public function testPrintTask()
     {
-        /** @var PrintTask $task */
-        $task = \Stego\service()->getDi()->get('task:print');
-        assertTrue($task instanceof PrintTask);
-        assertTrue($task->getBuilder() instanceof Builder);
-        assertTrue($task->getContainer() instanceof Container);
-        $task->setParams(array('message' => 'foo'));
-        assertTrue($task->getParam('message') === 'foo');
+        $mockedTask = $this->getMockBuilder('\Stego\Tasks\PrintTask')->getMock();
+        $mockedTask->expects($this->once())->method('run')->willReturn(null);
+        \Stego\service()->getDi()->set('task:print', $mockedTask);
+        \Stego\task('test:print');
     }
 }

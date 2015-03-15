@@ -2,6 +2,8 @@
 
 namespace Stego;
 
+use Stego\Console\Application;
+
 class Service
 {
     /** @var Container */
@@ -35,6 +37,9 @@ class Service
         return require $cfg;
     }
 
+    /**
+     * @return Application
+     */
     public function getApplication()
     {
         return $this->getDi()->get('console:application');

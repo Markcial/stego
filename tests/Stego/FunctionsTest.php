@@ -51,14 +51,25 @@ class FunctionsTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    public function testShell()
+    public function testRunFunction()
     {
-        $app = \Mockery::mock('\Stego\Console\Application');
+        $app = $this->getMockBuilder('\Stego\Console\Application')->getMock();
+        $app->expects($this->once())->method('run')->willReturn(null);
         service()->getDi()->set('console:application', $app);
+        run();
     }
 
-    public function testServiceMethods()
+    public function testShellFunction()
     {
+        $app = $this->getMockBuilder('\Stego\Console\Application')->getMock();
+        $app->expects($this->once())->method('shell')->willReturn(null);
+        service()->getDi()->set('console:application', $app);
+        shell();
+    }
+
+    public function testVersionFunction()
+    {
+        $this->assertEquals(service()->getVersion(), version());
     }
 
     /**

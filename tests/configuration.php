@@ -11,8 +11,8 @@ return array(
     'task:copy' => '#Stego\Tasks\Fs\CopyTask',
     'task:clean' => '#Stego\Tasks\Fs\CleanTask',
     'task:phar' => '#Stego\Tasks\Fs\PharTask',
-    'job:clean' => array(
-        'clean' => array('%{build:tmp}/src'),
+    'job:test:print' => array(
+        'print' => array('message' => '%{demo:message}'),
     ),
     'job:copy:source' => array(
         'print' => array('message' => '%[comment]Copying source.'),
@@ -42,6 +42,7 @@ return array(
     'console:commands:install' => '#Stego\Console\Commands\InstallCommand',
     'console:commands:loader' => '#Stego\Console\Commands\LoaderCommand',
 //    'console:commands:search' => '#Stego\Console\Commands\SearchCommand',
+    'vars:demo:message' => 'Some cool message!',
     'vars:fs:root' => getcwd(),
     'vars:fs:src' => '%{fs:root}/src',
     'vars:fs:tmp' => sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'stego',
