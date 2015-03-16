@@ -12,7 +12,6 @@ class BaseTaskTest extends \PHPUnit_Framework_TestCase
     public static function setUpBeforeClass()
     {
         if (!function_exists('\Stego\service')) {
-            Service::setDefaultConfiguration(getcwd() . '/tests/configuration.php');
             require getcwd() . '/src/functions.php';
         }
         if (!function_exists('assertTrue')) {
@@ -45,6 +44,19 @@ class BaseTaskTest extends \PHPUnit_Framework_TestCase
             ->willReturn(null);
 
         $task->run($params);
+    }
+
+    public function testRequiredParams()
+    {
+        $task = $this->getMockForTrait('\Stego\Tasks\Task');
+        $required = new \ReflectionProperty($task, 'required');
+        $required->setAccessible(true);
+        $required->setValue($task, array('foo'));
+        try {
+            $task->run();
+        } catch (\Exception $e) {
+            $this->assertEquals('Missing required parameter : "foo".', $e->getMessage());
+        }
     }
 
     public function testSetBuilderBaseTask()
@@ -81,7 +93,7 @@ class BaseTaskTest extends \PHPUnit_Framework_TestCase
                 return;
             });
 
-        $container = \Stego\service()->getDi();
+        $container = \Stego\service()->getContainer();
         $container->set('console:stdio', $mockedConsole);
         $task->setContainer($container);
 

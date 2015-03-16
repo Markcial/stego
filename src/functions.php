@@ -13,7 +13,7 @@ spl_autoload_register(function ($class) {
 /**
  * @return Service
  */
-function service()
+function &service()
 {
     static $service;
 
@@ -36,15 +36,15 @@ function import($vendor, $version = 'latest')
     static $locator;
 
     if (!isset($loader)) {
-        $loader = service()->getDi()->get('loader');
+        $loader = service()->getContainer()->get('loader');
     }
 
     if (!isset($locator)) {
-        $locator = service()->getDi()->get('locator');
+        $locator = service()->getContainer()->get('locator');
     }
 
     if ($location = $locator->locate($vendor, $version)) {
-        $metadata = service()->getDi()->get('vars:deps:metadata');
+        $metadata = service()->getContainer()->get('vars:deps:metadata');
         $metadata = json_decode($metadata, true);
         // fallback psr-0
         $loader->addPsr0Path('phar://' . $location . DIRECTORY_SEPARATOR);

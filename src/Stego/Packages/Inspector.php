@@ -53,11 +53,15 @@ class Inspector
         return '';
     }
     // responsible of the package versioning checks
-    protected function resolvePath()
+    protected function getRequires($vendor)
     {
     }
 
-    public function inspect($vendor, $version)
+    public function resolveDependencies($vendor, $version)
     {
+        $browser = new Browser();
+        $blacklist = array('php');
+
+        $dependencies = array();
     }
 }

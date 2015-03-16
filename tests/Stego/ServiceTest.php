@@ -9,13 +9,13 @@ use Stego\Console\Commands\Stdio\IOTerm;
 use Stego\Packages\Compiler;
 use Stego\Packages\Inspector;
 use Stego\Packages\Locator;
+use Stego\Stubs\TestConfiguration;
 
 class ServiceTest extends \PHPUnit_Framework_TestCase
 {
     public static function setUpBeforeClass()
     {
         if (!function_exists('\Stego\service')) {
-            Service::setDefaultConfiguration(getcwd() . '/tests/configuration.php');
             require getcwd() . '/src/functions.php';
         }
         if (!function_exists('assertTrue')) {
@@ -23,29 +23,28 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         }
     }
 
-    /**
-     * @runInSeparateProcess
-     */
-    public function testSetDefaultConfiguration()
+    public function testOverrideConfigurationWithSame()
     {
-        Service::setDefaultConfiguration('demo.php');
+        $baseConfig = new TestConfiguration();
+        $service = new Service($baseConfig);
         try {
-            new Service();
+            $service->setConfiguration($baseConfig);
         } catch (\RuntimeException $e) {
-            $this->assertEquals('Configuration file "demo.php" not found', $e->getMessage());
+            $this->assertEquals("Configuration hasn't changed.", $e->getMessage());
         }
     }
 
     public function testRetrieveDependencies()
     {
         $service = service();
-        $this->assertTrue($service->getDi()->get('loader') instanceof Loader);
-        $this->assertTrue($service->getDi()->get('compiler') instanceof Compiler);
-        $this->assertTrue($service->getDi()->get('inspector') instanceof Inspector);
-        $this->assertTrue($service->getDi()->get('locator') instanceof Locator);
-        $this->assertTrue($service->getDi()->get('console:stdio') instanceof IOTerm);
-        $this->assertTrue($service->getDi()->get('console:application') instanceof Application);
-        $this->assertTrue($service->getDi()->get('console:commands:install') instanceof InstallCommand);
-        $this->assertTrue($service->getDi()->get('console:commands:loader') instanceof LoaderCommand);
+        $service->setConfiguration(new TestConfiguration());
+        $this->assertTrue($service->getContainer()->get('loader') instanceof Loader);
+        $this->assertTrue($service->getContainer()->get('compiler') instanceof Compiler);
+        $this->assertTrue($service->getContainer()->get('inspector') instanceof Inspector);
+        $this->assertTrue($service->getContainer()->get('locator') instanceof Locator);
+        $this->assertTrue($service->getContainer()->get('console:stdio') instanceof IOTerm);
+        $this->assertTrue($service->getContainer()->get('console:application') instanceof Application);
+        $this->assertTrue($service->getContainer()->get('console:commands:install') instanceof InstallCommand);
+        $this->assertTrue($service->getContainer()->get('console:commands:loader') instanceof LoaderCommand);
     }
 }

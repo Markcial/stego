@@ -1,9 +1,7 @@
 {
     "name": "markcial/stego",
     "description": "Atomic dependency package manager.",
-    "require": {
-        "guzzle/guzzle": "@stable"
-    },
+    "require": {},
     "require-dev": {
         "phpunit/phpunit": "@stable",
         "mockery/mockery": "@stable",

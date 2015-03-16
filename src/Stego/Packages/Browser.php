@@ -90,6 +90,10 @@ class Browser
         return $response->json();
     }
 
+    public function download($what, $where, $showProgress = false)
+    {
+    }
+
     /**
      * @param $name
      * @param string $version
@@ -99,7 +103,7 @@ class Browser
      * @throws \Exception
      * @throws \HttpException
      */
-    public function getZipStream($name, $version = 'dev-master')
+    public function getZipUrl($name, $version = 'dev-master')
     {
         $data = $this->versionDetails($name, $version);
 
@@ -107,14 +111,6 @@ class Browser
             throw new \HttpException('Downloadable zip not found.');
         }
 
-        $stream = tempnam(sys_get_temp_dir(), 'stego');
-        $request = $this->getClient()->get($data['dist']['url']);
-        $response = $request->setResponseBody($stream)->send();
-
-        if ($response->getStatusCode() !== 200) {
-            throw new \HttpException('Http error');
-        }
-
-        return $stream;
+        return $data['dist']['url'];
     }
 }
