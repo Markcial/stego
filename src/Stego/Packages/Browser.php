@@ -64,7 +64,12 @@ class Browser
         $versions = $data['package']['versions'];
 
         if (!array_key_exists($version, $versions)) {
-            throw new \Exception('Version not found');
+            throw new \Exception(
+                sprintf(
+                    'Version not found, avaliable versions are : %s.',
+                    implode(", ", array_keys($versions))
+                )
+            );
         }
 
         return $data['package']['versions'][$version];

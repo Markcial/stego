@@ -2,7 +2,6 @@
 
 namespace Stego\Tasks;
 
-use Stego\Builder;
 use Stego\Console\Commands\Stdio\IOTerm;
 use Stego\ContainerAware;
 
@@ -96,11 +95,6 @@ trait Task
         }
 
         return $this->console;
-    }
-
-    public function out($message)
-    {
-        return $this->getConsole()->write($message);
     }
 
     public function getParams()

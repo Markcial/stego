@@ -5,7 +5,6 @@ namespace Stego\Console;
 use Stego\Console\Commands\Command;
 use Stego\Console\Commands\Stdio\IOTerm;
 use Stego\ContainerAware;
-use Stego\Exceptions\MissingDependencyException;
 
 class Application
 {

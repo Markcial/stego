@@ -130,4 +130,9 @@ class Output
 
         return fwrite($this->getStdOut(), $msg);
     }
+
+    public function out($text)
+    {
+        return fwrite($this->getStdOut(), $text);
+    }
 }
