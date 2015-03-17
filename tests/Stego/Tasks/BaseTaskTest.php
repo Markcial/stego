@@ -104,19 +104,4 @@ class BaseTaskTest extends \PHPUnit_Framework_TestCase
         $task = new PrintTask();
         $this->assertEquals('print', $task->getTaskName());
     }
-
-    public function testParamsOnBaseTask()
-    {
-        $task = $this->getMockForTrait('\Stego\Tasks\Task');
-
-        $params = array(
-            'foo' => 'bar',
-        );
-
-        $task->setParams($params);
-
-        $this->assertEquals('bar', $task->getParam('foo'));
-        $this->assertFalse($task->getParam('spam'));
-        $this->assertSame($params, $task->getParams());
-    }
 }

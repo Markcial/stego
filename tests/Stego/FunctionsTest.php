@@ -72,6 +72,28 @@ class FunctionsTest extends \PHPUnit_Framework_TestCase
         shell();
     }
 
+    public function testImportFunction()
+    {
+        $mockedLocator = $this->getMockBuilder('\Stego\Packages\Locator')
+            ->setMethods(array('locate'))
+            ->getMock();
+
+        $mockedLocator->expects($this->any())
+            ->method('locate')
+            ->willReturnOnConsecutiveCalls(array(true, false));
+
+        $config = new TestConfiguration();
+        service()->setConfiguration($config);
+        service()->getContainer()->set('locator', $mockedLocator);
+        import('some/library');
+
+        try {
+            import('another/library', 'v2.4.2');
+        } catch (\Exception $e) {
+            $this->assertEquals('Library another/library not found.', $e->getMessage());
+        }
+    }
+
     public function testVersionFunction()
     {
         $this->assertEquals(service()->getVersion(), version());

@@ -2,7 +2,7 @@
 
 namespace Stego\Tasks;
 
-use Stego\Console\Commands\Stdio\IOTerm;
+use Stego\Console\Stdio\Console;
 use Stego\ContainerAware;
 
 trait Task
@@ -10,11 +10,11 @@ trait Task
     use ContainerAware;
 
     protected $required = array();
-
+    /** @var array */
     protected $params = array();
     /** @var Builder */
     protected $builder;
-    /** @var IOTerm */
+    /** @var Console */
     protected $console;
 
     /**
@@ -25,7 +25,7 @@ trait Task
     public function run($params = array())
     {
         $this->init();
-        $this->setParams($params);
+        $this->params = $params;
         $this->parseParams();
         $this->doTask();
     }
@@ -72,11 +72,6 @@ trait Task
         $class = new \ReflectionClass(get_called_class());
 
         return preg_replace('!task$!', '', strtolower($class->getShortName()));
-    }
-
-    public function setParams(array $params)
-    {
-        $this->params = $params;
     }
 
     public function getParam($name)

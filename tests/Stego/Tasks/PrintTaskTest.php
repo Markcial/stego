@@ -20,15 +20,14 @@ class PrintTaskTest extends \PHPUnit_Framework_TestCase
     {
         $message = 'yadda!';
 
-        $mockedConsole = $this->getMockBuilder('\Stego\Console\Commands\Stdio\IOTerm')
+        $mockedConsole = $this->getMockBuilder('\Stego\Console\Stdio\Console')
             ->disableOriginalConstructor()
             ->getMock();
 
         $mockedConsole->expects($this->any())
-            ->method('__call')
-            ->willReturnCallback(function ($method, $args) use ($message) {
-                $this->assertEquals($method, 'write');
-                $this->assertContains($message, $args);
+            ->method('write')
+            ->willReturnCallback(function ($msg) use ($message) {
+                $this->assertEquals($message, $msg);
 
                 return;
             });

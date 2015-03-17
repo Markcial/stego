@@ -3,14 +3,14 @@
 namespace Stego\Console;
 
 use Stego\Console\Commands\Command;
-use Stego\Console\Commands\Stdio\IOTerm;
+use Stego\Console\Stdio\Console;
 use Stego\ContainerAware;
 
 class Application
 {
     use ContainerAware;
 
-    /** @var IOTerm */
+    /** @var Console */
     protected $stdio;
 
     protected $banner = <<<BANNER
@@ -23,7 +23,7 @@ BANNER;
     protected $mustQuit = false;
 
     /**
-     * @return IOTerm
+     * @return Console
      */
     public function getStdio()
     {
@@ -62,7 +62,7 @@ BANNER;
     {
         $command = $this->getStdio()->getCommand();
 
-        return $this->runCommand($command);
+        $this->runCommand($command);
     }
 
     protected function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)

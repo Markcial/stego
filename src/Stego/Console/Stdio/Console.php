@@ -1,9 +1,11 @@
 <?php
 
-namespace Stego\Console\Commands\Stdio;
+namespace Stego\Console\Stdio;
 
-class Output
+class Console
 {
+    const PROMPT = "\033[0;34mStg>\033[0m ";
+
     const DEBUG = 'debug';
     const INFO = 'info';
     const COMMENT = 'comment';
@@ -76,9 +78,28 @@ class Output
     );
 
     /** @var resource */
+    protected $stdin;
+    /** @var resource */
     protected $stdout;
     /** @var resource */
     protected $stderr;
+
+    /** @var string */
+    protected $command;
+    /** @var array */
+    protected $args;
+
+    /**
+     * @return resource
+     */
+    protected function getStdin()
+    {
+        if (is_null($this->stdin)) {
+            $this->stdin = fopen('php://stdin', 'r');
+        }
+
+        return $this->stdin;
+    }
 
     /**
      * @return resource
@@ -127,29 +148,78 @@ class Output
             $msg .= PHP_EOL;
         }
         if ($isError) {
-            return $this->err($msg);
+            $this->err($msg);
         }
 
-        return $this->out($msg);
+        $this->out($msg);
     }
 
+    /**
+     * @return int
+     */
     public function clear()
     {
-        return fwrite($this->getStdOut(), "\r");
+        fwrite($this->getStdOut(), "\r");
     }
 
+    /**
+     *
+     */
     public function nl()
     {
-        return fwrite($this->getStdOut(), PHP_EOL);
+        fwrite($this->getStdOut(), PHP_EOL);
     }
 
+    /**
+     * @param $text
+     */
     public function err($text)
     {
-        return fwrite($this->getStdErr(), $text);
+        fwrite($this->getStdErr(), $text);
     }
 
+    /**
+     * @param $text
+     *
+     * @return int
+     */
     public function out($text)
     {
-        return fwrite($this->getStdOut(), $text);
+        fwrite($this->getStdOut(), $text);
+    }
+
+    public function readline()
+    {
+        $cmd = readline(self::PROMPT);
+        readline_add_history($cmd);
+        $pieces = explode(" ", trim($cmd));
+        $this->command = array_shift($pieces);
+        $this->getArgs();
+    }
+
+    public function areArgsValid()
+    {
+        return $this->args !== false;
+    }
+
+    public function getArgs()
+    {
+        if (is_null($this->args)) {
+            $argv = $_SERVER['argv'];
+            $this->args = array_slice($argv, 2);
+        }
+
+        return $this->args;
+    }
+
+    public function getCommand()
+    {
+        if (is_null($this->command)) {
+            $argv = $_SERVER['argv'];
+            array_shift($argv);
+            $this->command = array_shift($argv);
+        }
+
+        return $this->command;
     }
 }

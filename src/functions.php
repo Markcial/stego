@@ -40,13 +40,9 @@ function import($vendor, $version = 'dev-master')
     }
 
     if (!$locator->locate($vendor, $version)) {
-        return trigger_error(sprintf('Library %s not found.', $vendor));
+        throw new \RuntimeException(sprintf('Library %s not found.', $vendor));
     }
 }
-
-// we use the guzzle http library, so we load it
-//import('guzzle/guzzle', '3.9.2.0');
-//require_once 'vendor/autoload.php';
 
 function shell()
 {
@@ -78,7 +74,7 @@ function task($name)
         $builder = service()->getBuilder();
     }
 
-    return $builder->run($name);
+    $builder->run($name);
 }
 
 /**

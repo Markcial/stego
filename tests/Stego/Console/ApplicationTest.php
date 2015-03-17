@@ -20,7 +20,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
     public function testGetStdio()
     {
         $service = new Service(new TestConfiguration());
-        $mockedStdio = $this->getMockBuilder('\Stego\Console\Commands\Stdio\IOTerm')
+        $mockedStdio = $this->getMockBuilder('\Stego\Console\Stdio\Console')
             ->disableOriginalConstructor()
             ->getMock();
         $service->getContainer()->set('console:stdio', $mockedStdio);
@@ -37,7 +37,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
             ->setMethods(array('shell'))
             ->getMock();*/
         $app = \Stego\service()->getApplication();
-        $mockedStdio = $this->getMockBuilder('\Stego\Console\Commands\Stdio\IOTerm')
+        $mockedStdio = $this->getMockBuilder('\Stego\Console\Stdio\Console')
             ->disableOriginalConstructor()
             ->setMethods(array('readline', 'areArgsValid', 'getCommand', 'write'))
             ->getMock();
@@ -52,8 +52,26 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
             return;
         });
         /*\Stego\service()->getDi()->set('console:application', $mockedApp);*/
-        \Stego\service()->getDi()->set('console:stdio', $mockedStdio);
+        \Stego\service()->getContainer()->set('console:stdio', $mockedStdio);
 
         \Stego\service()->getApplication()->shell();
+    }
+
+    public function testApplicationRunFunction()
+    {
+        $command = 'some-command';
+
+        $mockedApp = $this->getMockBuilder('\Stego\Console\Application')
+            ->getMock();
+
+        $mockedStdio = $this->getMockBuilder('\Stego\Console\Stdio\Console')
+            ->getMock();
+
+        $mockedStdio->expects($this->any())->method('getCommand')->willReturn($command);
+
+        $mockedApp->expects($this->any())->method('getStdio')->willReturn($mockedStdio);
+        $mockedApp->expects($this->any())->method('runCommand')->with($command)->willReturn(null);
+
+        $mockedApp->run();
     }
 }

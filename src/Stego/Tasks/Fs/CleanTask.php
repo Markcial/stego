@@ -12,10 +12,7 @@ class CleanTask
     {
         // cleanup
         $where = $this->getParams();
-        if (!is_array($where)) {
-            $this->getConsole()->write('%[warning]Cleaning folder : ' . $where);
-            @unlink($where);
-        }
+
         foreach ($where as $location) {
             $this->getConsole()->write('%[warning]Cleaning folder : ' . $location);
             @unlink($location);

@@ -2,6 +2,7 @@
 
 namespace Stego\Console;
 
+use Stego\Console\Stdio\Console;
 use Stego\ContainerAware;
 
 trait ApplicationAware
@@ -28,7 +29,7 @@ trait ApplicationAware
     }
 
     /**
-     * @return Commands\Stdio\IOTerm
+     * @return Console
      */
     public function getStdio()
     {

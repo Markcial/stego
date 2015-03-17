@@ -5,7 +5,7 @@ namespace Stego;
 use Stego\Console\Application;
 use Stego\Console\Commands\InstallCommand;
 use Stego\Console\Commands\LoaderCommand;
-use Stego\Console\Commands\Stdio\IOTerm;
+use Stego\Console\Stdio\Console;
 use Stego\Packages\Compiler;
 use Stego\Packages\Inspector;
 use Stego\Packages\Locator;
@@ -42,7 +42,7 @@ class ServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($service->getContainer()->get('compiler') instanceof Compiler);
         $this->assertTrue($service->getContainer()->get('inspector') instanceof Inspector);
         $this->assertTrue($service->getContainer()->get('locator') instanceof Locator);
-        $this->assertTrue($service->getContainer()->get('console:stdio') instanceof IOTerm);
+        $this->assertTrue($service->getContainer()->get('console:stdio') instanceof Console);
         $this->assertTrue($service->getContainer()->get('console:application') instanceof Application);
         $this->assertTrue($service->getContainer()->get('console:commands:install') instanceof InstallCommand);
         $this->assertTrue($service->getContainer()->get('console:commands:loader') instanceof LoaderCommand);

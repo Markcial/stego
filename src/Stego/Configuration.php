@@ -28,7 +28,7 @@ class Configuration
             '!task:copy'                => '#Stego\Tasks\Fs\CopyTask',
             '!task:clean'               => '#Stego\Tasks\Fs\CleanTask',
             '!task:phar'                => '#Stego\Tasks\Fs\PharTask',
-            '!console:stdio'            => '#Stego\Console\Commands\Stdio\IOTerm',
+            '!console:stdio'            => '#Stego\Console\Stdio\Console',
             '!console:application'      => '#Stego\Console\Application',
             '!console:commands:install' => '#Stego\Console\Commands\InstallCommand',
             '!console:commands:loader'  => '#Stego\Console\Commands\LoaderCommand',
