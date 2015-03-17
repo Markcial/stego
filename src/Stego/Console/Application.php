@@ -5,7 +5,6 @@ namespace Stego\Console;
 use Stego\Console\Commands\Command;
 use Stego\Console\Commands\Stdio\IOTerm;
 use Stego\ContainerAware;
-use Stego\Exceptions\MissingDependencyException;
 
 class Application
 {
@@ -14,19 +13,14 @@ class Application
     /** @var IOTerm */
     protected $stdio;
 
-    protected $mustQuit = false;
-
-    public function __construct()
-    {
-        $name = <<<BANNER
+    protected $banner = <<<BANNER
           .----.-.
          /    ( o \
         '|  __ ` ||
 Stego    |||  |||-' atomic package manager for PHP.
 BANNER;
 
-        //$version = $this->service->getVersion();
-    }
+    protected $mustQuit = false;
 
     /**
      * @return IOTerm
@@ -45,6 +39,11 @@ BANNER;
         if (PHP_SAPI !== 'cli') {
             throw new \RuntimeException('The console application can only be called via cli.');
         }
+
+        $this->getStdio()->write("%[comment]" . $this->banner);
+        $this->getStdio()->nl();
+
+        set_error_handler(array(&$this, 'errorHandler'));
 
         while (!$this->mustQuit) {
             $this->getStdio()->readline();
@@ -66,6 +65,12 @@ BANNER;
         return $this->runCommand($command);
     }
 
+    protected function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
+    {
+        $this->getStdio()->write('%[error]' . $errstr);
+        $this->usage();
+    }
+
     protected function runCommand($name)
     {
         // maybe the command is  asimple call to the application
@@ -73,16 +78,20 @@ BANNER;
             return call_user_func(array($this, $name));
         }
         // or maybe is a dependency that needs to be loaded
-        try {
-            $command = $this->getCommand($name);
-        } catch (MissingDependencyException $exc) { // create exception for not found dependencies
-            $this->getStdio()->write('%[error]' . $exc->getMessage());
-
-            return $this->runCommand('usage');
+        $command = $this->getCommand($name);
+        if ($command) {
+            $retCode = $command->execute($this->getStdio()->getArgs());
+            if ($retCode === 0) {
+                $this->getStdio()->write(sprintf("%%[info]Command %s completed succesfully", $name));
+            } else {
+                $this->getStdio()->write("%[error]command ended with unexpected code.");
+            }
         }
+    }
 
-        return $command->execute($this->getStdio()->getArgs());
-        //$command->execute($ags);
+    public function version()
+    {
+        $this->getStdio()->write('%[info]' . $this->getContainer()->get('vars:version'));
     }
 
     public function usage()
@@ -93,8 +102,8 @@ command [--args]
 
 avaliable commands
     loader
-    search
-    install
+    search [library]
+    install [library] [version constraint]
     usage|help
     version
     exit
@@ -110,7 +119,13 @@ HELP;
      */
     protected function getCommand($name)
     {
-        $command = $this->getContainer()->get(sprintf('console:commands:%s', $name));
+        $command = sprintf('console:commands:%s', $name);
+        if (!$this->getContainer()->has($command)) {
+            trigger_error(sprintf('Command named "%s" was not found.', $command));
+
+            return false;
+        }
+        $command = $this->getContainer()->get($command);
         $command->setApplication($this);
 
         return $command;

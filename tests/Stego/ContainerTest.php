@@ -51,7 +51,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
                 return $this->get('vars:set');
             },
         );
-        $container = new Container($config);
+        $container = new Container(new Configuration($config));
         $container->set('vars:set', 'bacon');
 
         $this->assertEquals($bar, $container->get('test:foo'));
@@ -89,6 +89,43 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($container->get('vars:foo'), 'yay, it works!');
     }
 
+    public function testObjectCache()
+    {
+        $container = new Container();
+        $container->set('simple', '#Stego\Stubs\SimpleObject');
+        $container->set('complex', '#Stego\Stubs\ComplexObject');
+
+        $simple = $container->get('simple');
+
+        // the simple must be caught from cache
+        $complex = $container->get('complex');
+        $this->assertSame($simple, $complex->getSimple());
+    }
+
+    public function testSearchWithoutWildcard()
+    {
+        $container = new Container();
+        $container->set('vars:foo', 'bar');
+        $container->set('vars:spam', 'eggs');
+
+        try {
+            $container->search('vars');
+        } catch (\Exception $e) {
+            $this->assertEquals('The parameter "vars" does not contain wilcard for pattern matching.', $e->getMessage());
+        }
+    }
+
+    public function testSeachMissingDependency()
+    {
+        $container = new Container();
+
+        try {
+            $container->get('foo');
+        } catch (\Exception $e) {
+            $this->assertEquals('Dependency/es named "foo" were not found.', $e->getMessage());
+        }
+    }
+
     /**
      * @covers Stego\Container::set
      * @covers Stego\Container::get
@@ -112,7 +149,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
     public function testExceptionOnMissingDependency()
     {
         try {
-            new Container(array('non:existant' => '#Missing\Class'));
+            new Container(new Configuration(array('non:existant' => '#Missing\Class')));
         } catch (\Exception $e) {
             $this->assertEquals('Class "Missing\Class" not found.', $e->getMessage());
         }

@@ -2,7 +2,6 @@
 
 namespace Stego\Tasks;
 
-use Stego\Builder;
 use Stego\Console\Commands\Stdio\IOTerm;
 use Stego\ContainerAware;
 
@@ -89,18 +88,13 @@ trait Task
         return false;
     }
 
-    private function getConsole()
+    protected function getConsole()
     {
         if (is_null($this->console)) {
             $this->console = $this->getContainer()->get('console:stdio');
         }
 
         return $this->console;
-    }
-
-    public function out($message)
-    {
-        return $this->getConsole()->write($message);
     }
 
     public function getParams()

@@ -1,8 +1,7 @@
 #!/usr/bin/php -dphar.readonly=0
 <?php
 
-require_once dirname(__DIR__) .  '/vendor/autoload.php';
 require_once dirname(__DIR__) .  '/src/functions.php';
 
 \Stego\service()->setConfiguration(new \Stego\Configuration());
-\Stego\run();
+\Stego\shell();

@@ -2,17 +2,14 @@
 
 namespace Stego\Tasks;
 
-use Stego\Builder;
-use Stego\Console\Commands\Stdio\IOTerm;
 use Stego\Container;
-use Stego\Service;
+use Stego\Stubs\TestConfiguration;
 
 class BaseTaskTest extends \PHPUnit_Framework_TestCase
 {
     public static function setUpBeforeClass()
     {
         if (!function_exists('\Stego\service')) {
-            Service::setDefaultConfiguration(getcwd() . '/tests/configuration.php');
             require getcwd() . '/src/functions.php';
         }
         if (!function_exists('assertTrue')) {
@@ -47,6 +44,19 @@ class BaseTaskTest extends \PHPUnit_Framework_TestCase
         $task->run($params);
     }
 
+    public function testRequiredParams()
+    {
+        $task = $this->getMockForTrait('\Stego\Tasks\Task');
+        $required = new \ReflectionProperty($task, 'required');
+        $required->setAccessible(true);
+        $required->setValue($task, array('foo'));
+        try {
+            $task->run();
+        } catch (\Exception $e) {
+            $this->assertEquals('Missing required parameter : "foo".', $e->getMessage());
+        }
+    }
+
     public function testSetBuilderBaseTask()
     {
         $task = $this->getMockForTrait('\Stego\Tasks\Task');
@@ -66,6 +76,7 @@ class BaseTaskTest extends \PHPUnit_Framework_TestCase
 
     public function testGetConsoleBaseTask()
     {
+        $this->markTestSkipped('Console is private here, revisit');
         $task = $this->getMockForTrait('\Stego\Tasks\Task');
 
         $mockedConsole = $this->getMockBuilder('\Stego\Console\Commands\Stdio\IOTerm')
@@ -81,11 +92,11 @@ class BaseTaskTest extends \PHPUnit_Framework_TestCase
                 return;
             });
 
-        $container = \Stego\service()->getDi();
+        $service = \Stego\service();
+        $service->setConfiguration(new TestConfiguration());
+        $container = $service->getContainer();
         $container->set('console:stdio', $mockedConsole);
         $task->setContainer($container);
-
-        $task->out('message');
     }
 
     public function testGetTaskName()

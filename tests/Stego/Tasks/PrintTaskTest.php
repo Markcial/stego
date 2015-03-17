@@ -2,14 +2,13 @@
 
 namespace Stego\Tasks;
 
-use Stego\Service;
+use Stego\Stubs\TestConfiguration;
 
 class PrintTaskTest extends \PHPUnit_Framework_TestCase
 {
     public static function setUpBeforeClass()
     {
         if (!function_exists('\Stego\service')) {
-            Service::setDefaultConfiguration(getcwd() . '/tests/configuration.php');
             require getcwd() . '/src/functions.php';
         }
         if (!function_exists('assertTrue')) {
@@ -19,9 +18,26 @@ class PrintTaskTest extends \PHPUnit_Framework_TestCase
 
     public function testPrintTask()
     {
-        $mockedTask = $this->getMockBuilder('\Stego\Tasks\PrintTask')->getMock();
-        $mockedTask->expects($this->once())->method('run')->willReturn(null);
-        \Stego\service()->getDi()->set('task:print', $mockedTask);
-        \Stego\task('test:print');
+        $message = 'yadda!';
+
+        $mockedConsole = $this->getMockBuilder('\Stego\Console\Commands\Stdio\IOTerm')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $mockedConsole->expects($this->any())
+            ->method('__call')
+            ->willReturnCallback(function ($method, $args) use ($message) {
+                $this->assertEquals($method, 'write');
+                $this->assertContains($message, $args);
+
+                return;
+            });
+
+        $service = \Stego\service();
+        $service->setConfiguration(new TestConfiguration());
+        $service->getContainer()->set('console:stdio', $mockedConsole);
+
+        $task = $service->getContainer()->get('task:print');
+        $task->run(array('message' => $message));
     }
 }

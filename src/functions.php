@@ -2,6 +2,8 @@
 
 namespace Stego;
 
+use Stego\Packages\Locator;
+
 spl_autoload_register(function ($class) {
     $file = preg_replace('#\\\|_(?!.+\\\)#', '/', $class) . '.php';
     $path = __DIR__ . DIRECTORY_SEPARATOR . $file;
@@ -13,12 +15,12 @@ spl_autoload_register(function ($class) {
 /**
  * @return Service
  */
-function service()
+function &service()
 {
     static $service;
 
     if (!isset($service)) {
-        $service = new Service();
+        $service = new Service(new Configuration());
     }
 
     return $service;
@@ -28,49 +30,18 @@ function service()
  * @param $vendor
  * @param string $version
  */
-function import($vendor, $version = 'latest')
+function import($vendor, $version = 'dev-master')
 {
-    /* @var Loader $loader */
-    static $loader;
     /* @var Locator $locator */
     static $locator;
 
-    if (!isset($loader)) {
-        $loader = service()->getDi()->get('loader');
-    }
-
     if (!isset($locator)) {
-        $locator = service()->getDi()->get('locator');
+        $locator = service()->getContainer()->get('locator');
     }
 
-    if ($location = $locator->locate($vendor, $version)) {
-        $metadata = service()->getDi()->get('vars:deps:metadata');
-        $metadata = json_decode($metadata, true);
-        // fallback psr-0
-        $loader->addPsr0Path('phar://' . $location . DIRECTORY_SEPARATOR);
-        // psr-0
-        if ((
-            array_key_exists('autoload', $metadata) &&
-            array_key_exists('psr-0', $metadata['autoload'])
-        )) {
-            foreach ($metadata['autoload']['psr-0'] as $ns => $path) {
-                $loader->addPsr0Path('phar://' . $location . DIRECTORY_SEPARATOR . $path);
-            }
-        }
-        // psr-4
-        if ((
-            array_key_exists('autoload', $metadata) &&
-            array_key_exists('psr-4', $metadata['autoload'])
-        )) {
-            foreach ($metadata['autoload']['psr-4'] as $prefix => $path) {
-                $loader->addPsr4Path($prefix, 'phar://' . $location . DIRECTORY_SEPARATOR . $path);
-            }
-        }
-
-        return $loader->bootstrap();
+    if (!$locator->locate($vendor, $version)) {
+        return trigger_error(sprintf('Library %s not found.', $vendor));
     }
-
-    return trigger_error(sprintf('Library %s not found.', $vendor));
 }
 
 // we use the guzzle http library, so we load it

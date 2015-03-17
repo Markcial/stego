@@ -24,7 +24,7 @@ trait ApplicationAware
      */
     public function getApplication()
     {
-        return $this->getApplication();
+        return $this->application;
     }
 
     /**
@@ -32,6 +32,6 @@ trait ApplicationAware
      */
     public function getStdio()
     {
-        return $this->getApplication()->getStdio();
+        return $this->application->getStdio();
     }
 }

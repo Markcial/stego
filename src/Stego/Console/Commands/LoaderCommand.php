@@ -5,25 +5,11 @@ namespace Stego\Console\Commands;
 class LoaderCommand
 {
     use Command;
-/*
-    protected function configure()
-    {
-        $this
-            ->setName('loader')
-            ->setDescription('Creates the autoloader.')
-        ;
-    }
-*/
+
     public function execute($args = array())
     {
         // function that fetches the dependencies in the src folder
         $di = $this->getContainer();
-
-        $buildFolder = $di->get('vars:build:tmp');
-        $dependencies = $di->get('vars:build:deps');
-
-        // bring stego source files to the build folder
-
 
         $pharFile = $di->get('vars:build:dest');
 
@@ -50,5 +36,7 @@ STUB;
         $phar->stopBuffering();
 
         unset($phar);
+
+        return 0;
     }
 }

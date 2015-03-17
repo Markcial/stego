@@ -1,0 +1,5 @@
+#!/bin/sh
+
+vendor/bin/phpunit --coverage-html ./build/coverage
+vendor/bin/phpcs -n --standard=phpcs.xml ./
+vendor/bin/php-cs-fixer --diff --dry-run -vv fix

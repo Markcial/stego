@@ -13,7 +13,7 @@ class PrintTask
 
     public function doTask()
     {
-        $this->out($this->getParam('message'));
+        $this->getConsole()->write($this->getParam('message'));
 
         return 0;
     }

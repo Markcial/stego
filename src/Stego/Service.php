@@ -3,38 +3,41 @@
 namespace Stego;
 
 use Stego\Console\Application;
+use Stego\Tasks\Builder;
 
 class Service
 {
     /** @var Container */
     protected $container;
-
-    protected static $defaultConfiguration;
+    /** @var Configuration */
+    protected $configuration;
 
     protected $version = '0.1b';
+    /** @var Builder */
+    protected $builder;
 
-    public function __construct($config = array())
+    /**
+     * @param Configuration $configuration
+     */
+    public function __construct(Configuration $configuration = null)
     {
-        if (empty($config)) {
-            $config = $this->loadDefaultConfiguration();
-        }
-
-        $this->container = new Container($config);
+        $this->configuration = $configuration;
+        $this->container = new Container($this->configuration);
     }
 
-    public static function setDefaultConfiguration($path)
+    /**
+     * @param Configuration $configuration
+     *
+     * @return bool
+     */
+    public function setConfiguration(Configuration $configuration)
     {
-        self::$defaultConfiguration = $path;
-    }
-
-    private function loadDefaultConfiguration()
-    {
-        $cfg = self::$defaultConfiguration;
-        if (!stream_resolve_include_path($cfg) || !file_exists($cfg)) {
-            throw new \RuntimeException(sprintf('Configuration file "%s" not found', $cfg));
+        if ($configuration === $this->configuration) {
+            return trigger_error("Configuration hasn't changed.");
         }
 
-        return require $cfg;
+        $this->configuration = $configuration;
+        $this->container = new Container($this->configuration);
     }
 
     /**
@@ -42,12 +45,19 @@ class Service
      */
     public function getApplication()
     {
-        return $this->getDi()->get('console:application');
+        return $this->getContainer()->get('console:application');
     }
 
+    /**
+     * @return mixed|Builder
+     */
     public function getBuilder()
     {
-        return $this->getDi()->get('builder');
+        if (is_null($this->builder)) {
+            $this->builder = $this->getContainer()->get('builder');
+        }
+
+        return $this->builder;
     }
 
     /**
@@ -55,13 +65,13 @@ class Service
      */
     public function getVersion()
     {
-        return $this->version;
+        return $this->getContainer()->get('vars:version');
     }
 
     /**
      * @return Container
      */
-    public function getDi()
+    public function getContainer()
     {
         return $this->container;
     }

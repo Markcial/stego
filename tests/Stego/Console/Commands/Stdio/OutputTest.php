@@ -70,4 +70,26 @@ class OutputTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals($expect, fgets($this->stderr));
         }
     }
+
+    public function testNl()
+    {
+        $this->output->nl();
+        rewind($this->stdout);
+        $this->assertEquals(PHP_EOL, fgets($this->stdout));
+    }
+
+    public function testClear()
+    {
+        $this->output->clear();
+        rewind($this->stdout);
+        $this->assertEquals("\r", fgets($this->stdout));
+    }
+
+    public function testOutputResources()
+    {
+        $this->markTestSkipped('revisit, needed to test stdout and stderr');
+        $output = new Output();
+        $output->out('foo');
+        $output->err('bar');
+    }
 }

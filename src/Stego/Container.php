@@ -4,22 +4,21 @@ namespace Stego;
 
 class Container
 {
-    /** @var \stdClass */
-    protected $di;
-    /** @var \SplObjectStorage */
-    protected $cache;
+    /** @var array */
+    protected $di = array();
+    /** @var array */
+    protected $cache = array();
     /** @var array */
     protected $guards = array();
     /** @var string */
     protected $guardKey = '!';
 
-    public function __construct($deps = array())
+    public function __construct(Configuration $configuration = null)
     {
-        $this->di = new \stdClass();
-        $this->cache = new \SplObjectStorage();
-
-        foreach ($deps as $key => $val) {
-            $this->set($key, $val);
+        if (!is_null($configuration)) {
+            foreach ($configuration->getDependencies() as $key => $val) {
+                $this->set($key, $val);
+            }
         }
     }
 
@@ -44,14 +43,14 @@ class Container
             if (preg_match('!^#!', $dep)) {
                 $class = substr($dep, 1, strlen($dep));
                 if (!class_exists($class, true)) {
-                    trigger_error(sprintf('Class "%s" not found.', $class));
+                    return trigger_error(sprintf('Class "%s" not found.', $class));
                 }
 
                 $dep = $this->newInstance(new \ReflectionClass($class));
             }
         }
 
-        $this->di->{$name} = $dep;
+        $this->di[$name] = $dep;
         if ($wantsProtect) {
             $this->guards[$name] = true;
         }
@@ -64,13 +63,13 @@ class Container
             return (bool) $this->getValidKeys($name);
         }
 
-        return property_exists($this->di, $name);
+        return array_key_exists($name, $this->di);
     }
 
     private function getValidKeys($name)
     {
         $pattern = str_replace('*', '[^:]*', $name);
-        $keys = array_keys(get_object_vars($this->di));
+        $keys = array_keys($this->di);
 
         return array_filter($keys, function ($key) use ($pattern) {
             return preg_match(sprintf('!^%s$!', $pattern), $key);
@@ -79,7 +78,7 @@ class Container
 
     public function isProtected($name)
     {
-        return property_exists($this->di, $name) && array_key_exists($name, $this->guards);
+        return array_key_exists($name, $this->di) && array_key_exists($name, $this->guards);
     }
 
     private function wantsProtect($name)
@@ -97,7 +96,7 @@ class Container
         return $this->wantsProtect($param) ? substr($param, strlen($this->guardKey), strlen($param)) : $param;
     }
 
-    private function search($name)
+    public function search($name)
     {
         if (!$this->usesWildcard($name)) {
             return trigger_error(sprintf('The parameter "%s" does not contain wilcard for pattern matching.', $name));
@@ -106,7 +105,7 @@ class Container
         $keys = $this->getValidKeys($name);
 
         $dependencies = array_map(function ($key) {
-            return $this->di->{$key};
+            return $this->di[$key];
         }, $keys);
 
         return array_map(array($this, 'warmUpDependency'), $dependencies);
@@ -161,7 +160,7 @@ class Container
             return array_map(array($this, 'warmUpDependency'), $this->search($name));
         }
 
-        return $this->warmUpDependency($this->di->{$name});
+        return $this->warmUpDependency($this->di[$name]);
     }
 
     /**
@@ -171,8 +170,8 @@ class Container
      */
     protected function getFromCache(\ReflectionClass $class)
     {
-        if ($this->cache->contains($class)) {
-            return $this->cache[$class];
+        if (array_key_exists($class->getName(), $this->cache)) {
+            return $this->cache[$class->getName()];
         }
 
         return false;
@@ -189,7 +188,7 @@ class Container
             $object->setContainer($this);
         }
 
-        $this->cache[$class] = $object;
+        $this->cache[$class->getName()] = $object;
     }
 
     /**

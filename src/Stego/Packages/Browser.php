@@ -2,26 +2,30 @@
 
 namespace Stego\Packages;
 
-use Guzzle\Service\Client;
-use Guzzle\Stream\Stream;
-
 class Browser
 {
+    const REQUEST_GET = 'GET';
+    const REQUEST_POST = 'POST';
+
     const PACKAGIST_SEARCH_URI = 'https://packagist.org/search.json?q=%s';
     const PACKAGIST_DETAILS_URI = 'https://packagist.org/packages/%s.json';
-    /** @var Client */
-    protected $client;
 
-    /**
-     * @return Client
-     */
-    protected function getClient()
+    protected function getContext($type)
     {
-        if (is_null($this->client)) {
-            $this->client = new Client();
-        }
+        return stream_context_create(
+            array(
+                "http" => array(
+                    "method"  => $type,
+                    "timeout" => 20,
+                    "header"  => "User-agent: Stego package manager",
+                ),
+            )
+        );
+    }
 
-        return $this->client;
+    protected function doRequest($url, $type = self::REQUEST_GET)
+    {
+        return file_get_contents($url, false, $this->getContext($type));
     }
 
     /**
@@ -39,13 +43,9 @@ class Browser
             $uri .= '&page=' . $page;
         }
 
-        $request = $this->getClient()->get($uri);
-        $response = $request->send();
-        if ($response->getStatusCode() !== 200) {
-            throw new \HttpException('Http error');
-        }
+        $response = $this->doRequest($uri);
 
-        return $response->json();
+        return json_decode($response, true);
     }
 
     /**
@@ -57,14 +57,24 @@ class Browser
      * @throws \Exception
      * @throws \HttpException
      */
-    public function versionDetails($name, $version = 'dev-master')
+    public function versionDetails($name, $version = null)
     {
         $data = $this->details($name, $version);
 
         $versions = $data['package']['versions'];
 
+        if (is_null($version)) {
+            // return the newest version
+            return $data['package']['versions'][key($versions)];
+        }
+
         if (!array_key_exists($version, $versions)) {
-            throw new \Exception('Version not found');
+            throw new \Exception(
+                sprintf(
+                    'Version not found, avaliable versions are : %s.',
+                    implode(", ", array_keys($versions))
+                )
+            );
         }
 
         return $data['package']['versions'][$version];
@@ -81,40 +91,8 @@ class Browser
     {
         $uri = sprintf(self::PACKAGIST_DETAILS_URI, $name);
 
-        $request = $this->getClient()->get($uri);
-        $response = $request->send();
-        if ($response->getStatusCode() !== 200) {
-            throw new \HttpException('Http error');
-        }
+        $response = $this->doRequest($uri);
 
-        return $response->json();
-    }
-
-    /**
-     * @param $name
-     * @param string $version
-     *
-     * @return Stream
-     *
-     * @throws \Exception
-     * @throws \HttpException
-     */
-    public function getZipStream($name, $version = 'dev-master')
-    {
-        $data = $this->versionDetails($name, $version);
-
-        if (!array_key_exists('dist', $data) || !array_key_exists('url', $data['dist'])) {
-            throw new \HttpException('Downloadable zip not found.');
-        }
-
-        $stream = tempnam(sys_get_temp_dir(), 'stego');
-        $request = $this->getClient()->get($data['dist']['url']);
-        $response = $request->setResponseBody($stream)->send();
-
-        if ($response->getStatusCode() !== 200) {
-            throw new \HttpException('Http error');
-        }
-
-        return $stream;
+        return json_decode($response, true);
     }
 }

@@ -2,44 +2,19 @@
 
 namespace Stego\Console\Commands;
 
-use Stego\Packages\Browser;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-
-class SearchCommand extends Command
+class SearchCommand
 {
-    protected function configure()
-    {
-        $this
-            ->setName('search')
-            ->setAliases(array('browse', 'find'))
-            ->setDescription('Searches for packages.')
-            ->setDefinition(
-                array(
-                    new InputArgument(
-                        'name',
-                        InputArgument::REQUIRED,
-                        'Name of the package to search.'
-                    ),
-                    new InputOption(
-                        'constraint',
-                        'c',
-                        InputOption::VALUE_OPTIONAL,
-                        'Version constraint'
-                    ),
-                )
-            )
-        ;
-    }
+    use Command;
 
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute($args = array())
     {
-        $name = $input->getArgument('name');
-        $browser = new Browser();
-        $data = $browser->find($name);
+        $library = array_shift($args);
+        $version = array_shift($args);
+
+        // function that fetches the dependencies in the src folder
+        $container = $this->getContainer();
+        $browser = $container->get('browser');
+        $data = $browser->find($library, $version);
 
         $display = array();
         foreach ($data['results'] as $result) {
@@ -53,6 +28,8 @@ class SearchCommand extends Command
                 chr(0xf0) . chr(0x9f) . chr(0x91) . chr(0x8d)
             );
         }
-        $output->writeln($display);
+        $this->getStdio()->write(implode("\n", $display));
+
+        return 0;
     }
 }

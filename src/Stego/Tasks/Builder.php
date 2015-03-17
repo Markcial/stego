@@ -1,6 +1,8 @@
 <?php
 
-namespace Stego;
+namespace Stego\Tasks;
+
+use Stego\ContainerAware;
 
 class Builder
 {
