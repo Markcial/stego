@@ -88,7 +88,7 @@ trait Task
         return false;
     }
 
-    private function getConsole()
+    protected function getConsole()
     {
         if (is_null($this->console)) {
             $this->console = $this->getContainer()->get('console:stdio');

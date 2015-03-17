@@ -29,5 +29,7 @@ class SearchCommand
             );
         }
         $this->getStdio()->write(implode("\n", $display));
+
+        return 0;
     }
 }

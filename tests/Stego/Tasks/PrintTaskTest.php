@@ -2,7 +2,6 @@
 
 namespace Stego\Tasks;
 
-use Stego\Service;
 use Stego\Stubs\TestConfiguration;
 
 class PrintTaskTest extends \PHPUnit_Framework_TestCase
@@ -19,16 +18,26 @@ class PrintTaskTest extends \PHPUnit_Framework_TestCase
 
     public function testPrintTask()
     {
-        $this->markTestSkipped('check later');
+        $message = 'yadda!';
+
+        $mockedConsole = $this->getMockBuilder('\Stego\Console\Commands\Stdio\IOTerm')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $mockedConsole->expects($this->any())
+            ->method('__call')
+            ->willReturnCallback(function ($method, $args) use ($message) {
+                $this->assertEquals($method, 'write');
+                $this->assertContains($message, $args);
+
+                return;
+            });
+
         $service = \Stego\service();
         $service->setConfiguration(new TestConfiguration());
+        $service->getContainer()->set('console:stdio', $mockedConsole);
 
-        $builder = $service->getBuilder();
-        $mockedTask = $this->getMockBuilder('\Stego\Tasks\PrintTask')->getMock();
-        $mockedTask->expects($this->any())->method('setBuilder')->with($builder)->willReturn(null);
-        //$mockedTask->expects($this->any())->method('out')->with('%{demo:message}')->willReturn(null);
-
-        $service->getContainer()->set('task:print', $mockedTask);
-        $builder->run('test:print');
+        $task = $service->getContainer()->get('task:print');
+        $task->run(array('message' => $message));
     }
 }

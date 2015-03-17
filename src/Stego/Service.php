@@ -3,6 +3,7 @@
 namespace Stego;
 
 use Stego\Console\Application;
+use Stego\Tasks\Builder;
 
 class Service
 {
@@ -15,12 +16,20 @@ class Service
     /** @var Builder */
     protected $builder;
 
+    /**
+     * @param Configuration $configuration
+     */
     public function __construct(Configuration $configuration = null)
     {
         $this->configuration = $configuration;
         $this->container = new Container($this->configuration);
     }
 
+    /**
+     * @param Configuration $configuration
+     *
+     * @return bool
+     */
     public function setConfiguration(Configuration $configuration)
     {
         if ($configuration === $this->configuration) {
@@ -39,6 +48,9 @@ class Service
         return $this->getContainer()->get('console:application');
     }
 
+    /**
+     * @return mixed|Builder
+     */
     public function getBuilder()
     {
         if (is_null($this->builder)) {
@@ -53,7 +65,7 @@ class Service
      */
     public function getVersion()
     {
-        return $this->version;
+        return $this->getContainer()->get('vars:version');
     }
 
     /**

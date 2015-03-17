@@ -4,8 +4,13 @@ namespace Stego\Console\Commands\Stdio;
 
 /**
  * @method write
+ * @method clear
+ * @method nl
+ * @method err
+ * @method out
  * @method getCommand
  * @method getArgs
+ * @method areArgsValid
  */
 class IOTerm
 {

@@ -109,7 +109,7 @@ class Output
      *
      * @return int
      */
-    public function write($msg)
+    public function write($msg, $newLine = true)
     {
         $isError = false;
         $pattern = sprintf('!^%%\[(?P<tag>%s)\]!', implode('|', $this->severities));
@@ -123,12 +123,29 @@ class Output
             }, $msg);
             $msg .= self::C_RESET;
         }
-        $msg .= PHP_EOL;
+        if ($newLine) {
+            $msg .= PHP_EOL;
+        }
         if ($isError) {
-            return fwrite($this->getStdErr(), $msg);
+            return $this->err($msg);
         }
 
-        return fwrite($this->getStdOut(), $msg);
+        return $this->out($msg);
+    }
+
+    public function clear()
+    {
+        return fwrite($this->getStdOut(), "\r");
+    }
+
+    public function nl()
+    {
+        return fwrite($this->getStdOut(), PHP_EOL);
+    }
+
+    public function err($text)
+    {
+        return fwrite($this->getStdErr(), $text);
     }
 
     public function out($text)

@@ -12,31 +12,73 @@ class Downloader
     /** @var IOTerm */
     protected $console;
 
-    public function download($url, $path)
+    public function download(Details $package)
     {
-        $filePath = $path . basename($url);
-        $fp = fopen ($filePath, 'w+');
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
-        curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_FILE, $fp);
-        curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, array($this, 'progress'));
-        curl_setopt($ch, CURLOPT_NOPROGRESS, false);
-        curl_setopt($ch, CURLOPT_BUFFERSIZE, 4);
+        $temp = $this->getContainer()->get('vars:fs:tmp');
+        // first we try the dist details
+        $url = $package->getDistUrl();
+        $destination = $temp . DIRECTORY_SEPARATOR . basename($url);
+        $dir = dirname($destination);
 
-        curl_exec($ch);
-        curl_close($ch);
+        if (!file_exists($dir)) {
+            @mkdir($dir);
+        }
 
-        fclose($fp);
+        $package->setZipFile($destination);
+        $ctx = stream_context_create(
+            array(
+                "http" => array(
+                    "method"  => "GET",
+                    "timeout" => 20,
+                    "header"  => "User-agent: Stego package manager",
+                ),
+            ),
+            array(
+                "notification" => array(&$this, 'notificationCallback'),
+            )
+        );
 
-        if (filesize($path) > 0) {
+        $fp = fopen($url, "r", false, $ctx);
+        if (is_resource($fp) && file_put_contents($package->getZipFile(), $fp)) {
+            $this->getConsole()->nl();
+
             return true;
         }
 
         return false;
+    }
+
+    protected function notificationCallback($code, $severity, $message, $messageCode, $downloadedBytes, $totalBytes)
+    {
+        static $filesize;
+        switch ($code) {
+
+            case STREAM_NOTIFY_PROGRESS:
+                if ($totalBytes !== 0) {
+                    $filesize = $totalBytes;
+                }
+                if ($downloadedBytes > 0) {
+                    if (!isset($filesize)) {
+                        $this->getConsole()->write(
+                            sprintf("%%[info]\rUnknown filesize.. %2d kb done..", $downloadedBytes/1024),
+                            false
+                        );
+                    } else {
+                        $length = (int) (($downloadedBytes/$filesize)*100);
+                        $this->getConsole()->write(
+                            sprintf(
+                                "%%[info]\r[%-100s] %d%% (%2d/%2d kb)",
+                                str_repeat("=", $length) . ">",
+                                $length,
+                                $downloadedBytes/1024,
+                                $filesize/1024
+                            ),
+                            false
+                        );
+                    }
+                }
+                break;
+        }
     }
 
     public function getConsole()
@@ -46,14 +88,5 @@ class Downloader
         }
 
         return $this->console;
-    }
-
-    protected function progress($rsc, $dSize, $dld, $uSize, $uld)
-    {
-        $perc = 0;
-        if ($dld && $dSize) {
-            $perc = (double)($dld / $dSize);
-        }
-        $this->getConsole()->out(sprintf("\rProgress : %.2f%%", $perc * 100));
     }
 }

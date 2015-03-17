@@ -34,20 +34,28 @@ class Configuration
             '!console:commands:loader'  => '#Stego\Console\Commands\LoaderCommand',
             '!console:commands:search'  => '#Stego\Console\Commands\SearchCommand',
             // vars
+            '!vars:version' => '0.2b',
             '!vars:fs:root' => getcwd(),
             '!vars:fs:src' => '%{fs:root}/src',
             '!vars:fs:tmp' => sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'stego',
             '!vars:fs:vendor' => '%{fs:root}/vendor',
+            '!vars:zip:tmp' => '%{fs:tmp}/%{dyn:vendor}/%{dyn:version}',
             '!vars:deps:metadata' => '@phar://%{deps:dynamic}/composer.json',
             '!vars:deps:folder' => 'deps',
             '!vars:deps:pharname' => 'package.phar',
             '!vars:deps:path' => '%{fs:root}/%{deps:folder}',
-            '!vars:deps:dynamic' => '%{deps:path}/%{dyn:vendor}/%{dyn:version}/%{deps:pharname}',
+            '!vars:phar:relative' => '%{deps:folder}/%{dyn:vendor}/%{dyn:version}/%{deps:pharname}',
+            '!vars:phar:absolute' => '%{deps:path}/%{dyn:vendor}/%{dyn:version}/%{deps:pharname}',
+            '!vars:phar:alias' => function () {
+                return sprintf(
+                    '%s-%s.phar',
+                    str_replace('/', '-', $this->get('vars:dyn:vendor')),
+                    $this->get('vars:dyn:version')
+                );
+            },
             '!vars:build:pharname' => 'stego.phar',
             '!vars:build:tmp' => '%{fs:root}/build',
             '!vars:build:dest' => '%{fs:root}/%{deps:folder}/%{build:pharname}',
-            '!vars:build:guzzle:src' => '%{fs:vendor}/guzzle/guzzle/src',
-            '!vars:build:sf:evt:src' => '%{fs:vendor}/symfony/event-dispatcher',
             // jobs
             '!job:clean' => array(
                 'clean' => array('%{build:tmp}/src'),
@@ -55,14 +63,6 @@ class Configuration
             '!job:copy:source' => array(
                 'print' => array('message' => '%[comment]Copying source.'),
                 'copy' => array('from' => '%{fs:src}', 'to' => '%{build:tmp}/src'),
-            ),
-            '!job:copy:deps:guzzle' => array(
-                'print' => array('message' => '%[comment]Copying guzzle dependencies.'),
-                'copy' => array('from' => '%{build:guzzle:src}', 'to' => '%{build:tmp}/src'),
-            ),
-            '!job:copy:deps:sfevt' => array(
-                'print' => array('message' => '%[comment]Copying symfony event dispatcher dependencies.'),
-                'copy' => array('from' => '%{build:sf:evt:src}', 'to' => '%{build:tmp}/src'),
             ),
             '!job:make:phar' => array(
                 'phar' => array(
@@ -78,16 +78,26 @@ class Configuration
         );
     }
 
+    /**
+     * @param $name
+     * @param $dependency
+     */
     public function addDependency($name, $dependency)
     {
         $this->extraDependencies[$name] = $dependency;
     }
 
+    /**
+     * @return array
+     */
     protected function getExtraDependencies()
     {
         return $this->extraDependencies;
     }
 
+    /**
+     * @return array
+     */
     public function getDependencies()
     {
         return array_merge(

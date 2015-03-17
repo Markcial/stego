@@ -3,6 +3,7 @@
 namespace Stego;
 
 use Stego\Stubs\TestConfiguration;
+use Stego\Tasks\Builder;
 
 class FunctionsTest extends \PHPUnit_Framework_TestCase
 {
@@ -81,6 +82,8 @@ class FunctionsTest extends \PHPUnit_Framework_TestCase
      */
     public function testSplAutoloadRegister()
     {
+        $this->markTestSkipped('find another way to test the loader...');
+        service()->setConfiguration(new TestConfiguration());
         global $currentClass;
         $classes = array(
             '\Stego\Stubs\SimpleObject',

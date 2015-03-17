@@ -14,8 +14,17 @@ class InstallCommand
         $version = array_shift($args);
 
         $container = $this->getContainer();
+        $container->set('vars:dyn:vendor', $library);
+        $container->set('vars:dyn:version', $version);
         /** @var Manager $manager */
         $manager = $container->get('manager');
-        $manager->download($library, $version);
+
+        $manager->findPackage($library, $version);
+        $manager->download();
+        $manager->extract();
+        $manager->toPhar();
+        $manager->cleanup();
+
+        return 0;
     }
 }

@@ -11,7 +11,6 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase
         $config->addDependency('foo', 'bar');
         $extended = $config->getDependencies();
 
-        $this->assertArraySubset($base, $extended);
         $this->assertArrayHasKey('foo', $extended);
         $this->assertEquals($extended['foo'], 'bar');
     }

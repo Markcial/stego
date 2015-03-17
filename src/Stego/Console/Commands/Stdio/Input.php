@@ -17,30 +17,7 @@ class Input
         readline_add_history($cmd);
         $pieces = explode(" ", trim($cmd));
         $this->command = array_shift($pieces);
-
-        $this->args = $this->sanitizeArgs($pieces);
-    }
-
-    private function sanitizeArgs($args)
-    {
-        $invalidFlag = false;
-        $saneArgs = array();
-        while (count($args)) {
-            $token = array_shift($args);
-            if (substr($token, 0, 1) !== '-') {
-                $invalidFlag = true;
-                break;
-            }
-
-            if (count($args) && substr($args[0], 0, 1) !== '-') {
-                $saneArgs[$token] = array_shift($args);
-                continue;
-            }
-
-            $saneArgs[$token] = true;
-        }
-
-        return $invalidFlag ? false : $saneArgs;
+        $this->getArgs();
     }
 
     public function areArgsValid()
